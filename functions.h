@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-
+// does this work?
 typedef char longString[71]; //for steps 70 characters
 typedef char shortString[21]; //for items 20 characters
 
