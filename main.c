@@ -9,10 +9,19 @@ UPDATE LOG: by shen
             : Developed foodCalories() function to add food entries with validation to prevent duplicates
             : Added checkFoodName() function to check for existing food names in the array
             : Updated main() function to test the foodCalories() function and display entered food data
+
+UPDATE LOG: by marco
+- 2026-03-04: Composed getChoice() to get input from use what mode to do
+			: Composed displayMain() to display mainMenu and choices
+			: Fixed order of updateMode() to fit in with displayMain()
+			: Created updatefunctions header
+			: Created getChoiceUpdate() to pick options for updateMenu
+			: Created displayUpdate() to display updateMenu and choices
 */
 
 #include <stdio.h>
 #include "functions.h"
+#include "updatefunctions.h"
 
 int main ()
 {
@@ -20,8 +29,7 @@ int main ()
     struct recipeTag recipes[50];
     int foodCount = 0;
 
-    mainMenu();
-    updateMode();
+    displayMain();
     
     foodCalories(foods, &foodCount);
     foodCalories(foods, &foodCount); // call again to test next index for food entry

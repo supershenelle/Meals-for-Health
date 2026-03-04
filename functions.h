@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "updatefunctions.h"
 
 typedef char longString[71]; //for steps 70 characters
 typedef char shortString[21]; //for items 20 characters
@@ -27,65 +28,6 @@ struct recipeTag
     struct ingredientTag ingredients[20];
     longString           steps[15];
 };
-
-void mainMenu ()
-{
-    printf("============================\n");
-    printf("| %24s |\n", " ");
-    printf("| %4s MAIN MENU %9s |\n", " ", " ");
-    printf("| %4s [U] Update Menu %4s|\n", " ", " ");
-    printf("| %4s [A] Access Menu %4s|\n", " ", " ");
-    printf("| %4s [E] Exit Menu %6s|\n", " ", " ");
-    printf("| %24s |\n", " ");
-    printf("============================\n\n");
-}
-
-int getChoice () 
-{
-    /*
-    Make a function that:
-    - reads the user’s choice (ex: U/A/E)
-    - rejects invalid input and asks again
-    - returns a clean, single choice your main can use
-    */
-
-    return -1; //if invalid choice
-}
-
-void displayMain ()
-{
-    /*
-    Make a function that:
-    - displays main menu
-    - gets the user choice
-    - LOOPS if the user's choice is invalid
-    */
-}
-
-void updateMode ()
-{
-    shortString user;
-    shortString pass;
-    shortString userKey = "admin";
-    shortString passKey = "ad1234";
-
-    printf("Enter username: ");
-    scanf(" %s", user);
-    printf("Enter password: ");
-    scanf(" %s", pass);
-
-    if (strcmp(user, userKey)==0 && strcmp(pass, passKey)==0)
-    {
-        printf("USER VALIDATED // SUCCESSFUL ENTRY\n");
-        // update mode access
-    }
-        
-    else
-    {
-        printf("Invalid username or password\n");
-        //displayMain ();
-    }
-}
 
 
 void getString (shortString str)
@@ -119,50 +61,91 @@ void getString (shortString str)
     } while (i == 0);
 }
 
-int checkFoodName (struct foodTag foods[], int foodCount, shortString name)
+int updateMode ()
 {
-    for (int i = 0; i < foodCount; i++)
+    int res;
+	shortString user;
+    shortString pass;
+    shortString userKey = "admin";
+    shortString passKey = "ad1234";
+
+    printf("Enter username: ");
+    scanf(" %s", user);
+    printf("Enter password: ");
+    scanf(" %s", pass);
+
+    if (strcmp(user, userKey)==0 && strcmp(pass, passKey)==0)
     {
-        if (strcmp(foods[i].name, name) == 0)
-            return i; // return index of existing food
+        printf("USER VALIDATED // SUCCESSFUL ENTRY\n");
+        res = getChoiceUpdate(nChoice);
     }
-    return -1; // not found
-}
-
-void foodCalories (struct foodTag foods[], int *foodCount)
-{
-    int i = *foodCount; // get current count of food entries
-    shortString temp; // temporary string for food name input and checking
-
-    do {
-        printf("\nEnter food name: ");
-        getString(temp);
-
-        if (checkFoodName(foods, *foodCount, temp) != -1)
-            printf("Food already exists at index %d. Please enter a different name.\n", checkFoodName(foods, *foodCount, temp));
-        else
-            strcpy(foods[i].name, temp);
-    } while (checkFoodName(foods, *foodCount, temp) != -1);
+        
+    else
+    {
+        printf("Invalid username or password\n");
+        res = -1;
+    }
     
-    printf("Enter quantity: ");
-    scanf(" %f", &foods[i].quantity);
-    printf("Enter unit: ");
-    getString(foods[i].unit);
-    printf("Enter calories: ");
-    scanf(" %f", &foods[i].calories);
-    (*foodCount)++; // increment food count for next entry
+    return res;
 }
 
-void viewFoodCalories (struct foodTag foods[], int foodCount)
+void mainMenu ()
 {
-    /*
-    Display all food entries in a formatted list.
-    */
+    printf("============================\n");
+    printf("| %24s |\n", " ");
+    printf("| %4s MAIN MENU %9s |\n", " ", " ");
+    printf("| %4s [U] Update Menu %4s|\n", " ", " ");
+    printf("| %4s [A] Access Menu %4s|\n", " ", " ");
+    printf("| %4s [E] Exit Menu %6s|\n", " ", " ");
+    printf("| %24s |\n", " ");
+    printf("============================\n\n");
 }
 
-void saveCalories (struct foodTag foods[], int foodCount)
+int getChoice (char cChoice) 
 {
-    /*
-    Save the food entries to a file for later retrieval.
-    */
+    int res=1;
+    
+    switch(cChoice)
+	{
+		case 'U':
+		case 'u':
+			res = updateMode()/*updateMenu function*/;
+			break;
+		case 'A':
+		case 'a':
+			/*accessMenu function*/;
+			break;
+		case 'E':
+		case 'e':
+			{
+			/*exitMenu function*/;
+			res=0;
+			} 
+			break;
+		
+		default: 
+		{
+			printf("Invalid Option! Please try again\n\n");
+			res=-1;
+		}
+	}
+	
+	return res;
 }
+
+void displayMain ()
+{
+    char cChoice;
+    int res;
+    do
+	{
+		mainMenu();
+		printf("Mode:");
+		scanf(" %c",&cChoice);
+		
+		res = getChoice(cChoice);
+		
+	}while(res==-1); //ends loop if invalid input or input is exit
+	
+}
+
