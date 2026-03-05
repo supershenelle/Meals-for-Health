@@ -23,22 +23,7 @@ int main ()
     struct recipeTag recipes[50];
     int foodCount = 0;
 
-    displayMain();
-
-    
-    /*
-    foodCalories(foods, &foodCount);
-    foodCalories(foods, &foodCount); // call again to test next index for food entry
-
-    int t = 0; //for TESTING of display. change to diff index for diff food entry
-    printf("\nEnter food index to display: ");
-    scanf(" %d", &t);
-    printf("\nTEST\n");
-    printf("Food name: %s\n", foods[t].name);
-    printf("Quantity: %.2f\n", foods[t].quantity);
-    printf("Unit: %s\n", foods[t].unit);
-    printf("Calories: %.2f\n", foods[t].calories);
-    */
+    displayMain(foods, foodCount);
 
     return 0;
 }
