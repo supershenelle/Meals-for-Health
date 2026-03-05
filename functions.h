@@ -61,7 +61,27 @@ void getString (shortString str)
     } while (i == 0);
 }
 
-int updateMode ()
+void updateMenu ()
+{
+    printf("============================\n");
+    printf("| %24s |\n", " ");
+    printf("| %4s UPDATE MENU %7s |\n", " ", " ");
+    printf("| %4s [1] Add Food Calories %2s|\n", " ", " ");
+    printf("| %4s [2] View Food Calories %1s|\n", " ", " ");
+    printf("| %4s [3] Save Calories %8s|\n", " ", " ");
+    printf("| %4s [4] Load Calories %8s|\n", " ", " ");
+    printf("| %4s [5] Add Recipe %11s|\n", " ", " ");
+    printf("| %4s [6] Modify Recipe %6s|\n", " ", " ");
+    printf("| %4s [7] Delete Recipe %6s|\n", " ", " ");
+    printf("| %4s [8] List Recipes %9s|\n", " ", " ");
+    printf("| %4s [9] Scan Recipe %9s|\n", " ", " ");
+    printf("| %4s [10] Search Recipe%5s|\n", " ", " ");
+    printf("| %4s [11] Export Recipe%5s|\n", " ", " ");
+    printf("| %4s [12] Import Recipe%5s|\n", " ", " ");
+    printf("| %4s [13] Exit Update Menu%1s|\n", " ", " ");
+}
+
+int updateMode (struct foodTag foods[], int foodCount)
 {
     int res;
     int nChoice;
@@ -82,7 +102,7 @@ int updateMode ()
         printf("| Option: ");
         scanf(" %d", &nChoice);
         printf("%25s |", " ");
-        res = getChoiceUpdate(nChoice);
+        res = getChoiceUpdate(nChoice,foods,foodCount); //error dahil nasa baba yung getChoice function pero d mo maangat kasi the other functions mapupunta sa baba
     }
         
     else
@@ -106,7 +126,7 @@ void mainMenu ()
     printf("============================\n\n");
 }
 
-int getChoice (char cChoice) 
+int getChoice (char cChoice, struct foodTag foods[], int foodCount) 
 {
     int res=1;
     
@@ -114,7 +134,7 @@ int getChoice (char cChoice)
 	{
 		case 'U':
 		case 'u':
-			res = updateMode()/*updateMenu function*/;
+			res = updateMode(foods, foodCount)/*updateMenu function*/;
 			break;
 		case 'A':
 		case 'a':
@@ -138,7 +158,7 @@ int getChoice (char cChoice)
 	return res;
 }
 
-void displayMain ()
+void displayMain (struct foodTag foods[], int foodCount)
 {
     char cChoice;
     int res;
@@ -148,7 +168,7 @@ void displayMain ()
 		printf("Mode:");
 		scanf(" %c",&cChoice);
 		
-		res = getChoice(cChoice);
+		res = getChoice(cChoice,foods,foodCount);
 		
 	}while(res==-1); //ends loop if invalid input or input is exit
 	
@@ -163,7 +183,7 @@ void addFoodCalories (struct foodTag foods[], int *foodCount)
         printf("\nEnter food name: ");
         getString(temp);
 
-        if (checkFoodName(foods, *foodCount, temp) != -1)
+        if (checkFoodName(foods, *foodCount, temp) != -1) // gago bat nawala checkFoodName mo wala akong ginalaw dyan
             printf("Food already exists at index %d. Please enter a different name.\n", checkFoodName(foods, *foodCount, temp));
         else
             strcpy(foods[i].name, temp);
@@ -202,68 +222,49 @@ void saveCalories (struct foodTag foods[], int foodCount)
     */
 }
 
-void updateMenu ()
-{
-    printf("============================\n");
-    printf("| %24s |\n", " ");
-    printf("| %4s UPDATE MENU %7s |\n", " ", " ");
-    printf("| %4s [1] Add Food Calories %2s|\n", " ", " ");
-    printf("| %4s [2] View Food Calories %1s|\n", " ", " ");
-    printf("| %4s [3] Save Calories %8s|\n", " ", " ");
-    printf("| %4s [4] Load Calories %8s|\n", " ", " ");
-    printf("| %4s [5] Add Recipe %11s|\n", " ", " ");
-    printf("| %4s [6] Modify Recipe %6s|\n", " ", " ");
-    printf("| %4s [7] Delete Recipe %6s|\n", " ", " ");
-    printf("| %4s [8] List Recipes %9s|\n", " ", " ");
-    printf("| %4s [9] Scan Recipe %9s|\n", " ", " ");
-    printf("| %4s [10] Search Recipe%5s|\n", " ", " ");
-    printf("| %4s [11] Export Recipe%5s|\n", " ", " ");
-    printf("| %4s [12] Import Recipe%5s|\n", " ", " ");
-    printf("| %4s [13] Exit Update Menu%1s|\n", " ", " ");
-}
-int getChoiceUpdate (int nChoice) 
+int getChoiceUpdate (int nChoice, struct foodTag foods[], int foodCount) 
 {
     int res=1;
     
     switch(nChoice)
 	{
-		case '1':
-			res = addFoodCalories(foods,*foodCount);
+		case 1:
+			addFoodCalories(foods,&foodCount);
 			break;
-		case '2':
-			res = viewFoodCalories(foods,foodCount);
+		case 2:
+			viewFoodCalories(foods,foodCount);
 			break;
-		case '3':
-			res = saveCalories(foods,foodCount);
+		case 3:
+			saveCalories(foods,foodCount);
 			break;
-		case '4':
+		case 4:
 			//res = loadCalories();
 			break;
-		case '5':
+		case 5:
 			//res = addReceipe();
 			break;
-		case '6':
+		case 6:
 			//res = modReceipe();
 			break;
-		case '7':
+		case 7:
 			//res = deleteReceipe();
 			break;
-		case '8':
+		case 8:
 			//res = listReceipe();
 			break;
-		case '9':
+		case 9:
 			//res = scanReceipe();
 			break;
-		case '10':
+		case 10:
 			//res = searchReceipe();
 			break;
-		case '11':
+		case 11:
 			//res = exportReceipe();
 			break;
-		case '12':
+		case 12:
 			//res = importReceipe();
 			break;
-		case '13':
+		case 13:
 			{
 			/*exitMenu function*/;
 			res=0;
@@ -280,7 +281,7 @@ int getChoiceUpdate (int nChoice)
 	return res;
 }
 
-void displayUpdate()
+void displayUpdate(struct foodTag foods[], int foodCount)
 {
     int nChoice;
     int res;
@@ -290,7 +291,7 @@ void displayUpdate()
 		printf("Mode:");
 		scanf(" %d",&nChoice);
 		
-		res = getChoiceUpdate(nChoice);
+		res = getChoiceUpdate(nChoice,foods,foodCount);
 		
 	}while(res==-1); //ends loop if invalid input or input is exit
 	
