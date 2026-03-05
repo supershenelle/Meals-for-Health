@@ -2,13 +2,7 @@
 
 /*
 UPDATE LOG: by shen
-- 2026-03-03: Composed structures for food and recipe data
-            : Added mainMenu() function to display the main menu
-            : Implemented updateMode() function for user authentication
-            : Created getString() function to safely read strings from user input
-            : Developed foodCalories() function to add food entries with validation to prevent duplicates
-            : Added checkFoodName() function to check for existing food names in the array
-            : Updated main() function to test the foodCalories() function and display entered food data
+- 2026-03-03: Composed updateMenu() to display update menu and choices
 
 UPDATE LOG: by marco
 - 2026-03-04: Composed getChoice() to get input from use what mode to do
@@ -21,7 +15,7 @@ UPDATE LOG: by marco
 
 #include <stdio.h>
 #include "functions.h"
-#include "updatefunctions.h"
+// #include "updatefunctions.h"
 
 int main ()
 {
