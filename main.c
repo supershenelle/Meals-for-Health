@@ -2,7 +2,15 @@
 
 /*
 UPDATE LOG: by shen
-- 2026-03-03: Composed updateMenu() to display update menu and choices
+- 2026-03-06: Applied validation for food name input in addFoodCalories() to prevent duplicate entries
+            : Applied validation for quantity input in addFoodCalories() to prevent invalid input and negative numbers
+            : Fixed UI and display
+            : Made option 1 and 2 from updateMenu functional
+
+- NOTES/ISSUES
+! Food name input is case-sensitive, so "Apple" and "apple" would be considered different entries. 
+! Character input in quantity field causes quantity to become 0 and loop to continue running with invalid input.
+____________________________________________________________________________________________________________________________________________________
 
 UPDATE LOG: by marco
 - 2026-03-04: Composed getChoice() to get input from use what mode to do
