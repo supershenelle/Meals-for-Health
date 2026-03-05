@@ -30,7 +30,9 @@ int main ()
     int foodCount = 0;
 
     displayMain();
+
     
+    /*
     foodCalories(foods, &foodCount);
     foodCalories(foods, &foodCount); // call again to test next index for food entry
 
@@ -42,6 +44,7 @@ int main ()
     printf("Quantity: %.2f\n", foods[t].quantity);
     printf("Unit: %s\n", foods[t].unit);
     printf("Calories: %.2f\n", foods[t].calories);
+    */
 
     return 0;
 }
