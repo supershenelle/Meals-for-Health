@@ -39,7 +39,12 @@ void displayDivider2()
     printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
 }
 
-int getChoiceUpdate (int nChoice, struct foodTag foods[], int foodCount);
+void longDivider()
+{
+    printf("|==============================================================================|\n");
+}
+
+int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount);
 
 void getString (shortString str)
 {
@@ -92,14 +97,14 @@ void updateMenu ()
     printf("| %2s [13] Exit Update Menu %4s|\n", " ", " ");
 }
 
-int updateMode (struct foodTag foods[], int foodCount)
+int updateMode (struct foodTag foods[], int *foodCount)
 {
     int res;
     int nChoice;
     shortString user;
     shortString pass;
-    shortString userKey = "admin";
-    shortString passKey = "ad1234";
+    shortString userKey = "a";
+    shortString passKey = "a";
 
     printf("-->%1s Enter username: ", " ");
     scanf(" %s", user);
@@ -147,15 +152,17 @@ void mainMenu ()
 
 int checkFoodName (struct foodTag foods[], int foodCount, shortString name)
 {
+    int res = -1;
+
     for (int i = 0; i < foodCount; i++)
     {
         if (strcmp(foods[i].name, name) == 0)
-            return i; // return index of existing food
+            res = i; // return index of existing food
     }
-    return -1; // not found
+    return res; // not found
 }
 
-int getChoice (char cChoice, struct foodTag foods[], int foodCount) 
+int getChoice (char cChoice, struct foodTag foods[], int *foodCount) 
 {
     int res=1;
     
@@ -163,7 +170,7 @@ int getChoice (char cChoice, struct foodTag foods[], int foodCount)
 	{
 		case 'U':
 		case 'u':
-			res = updateMode(foods, foodCount)/*updateMenu function*/;
+			res = updateMode(foods, foodCount);
 			break;
 		case 'A':
 		case 'a':
@@ -189,7 +196,7 @@ int getChoice (char cChoice, struct foodTag foods[], int foodCount)
 	return res;
 }
 
-void displayMain (struct foodTag foods[], int foodCount)
+void displayMain (struct foodTag foods[], int *foodCount)
 {
     char cChoice;
     int res;
@@ -201,7 +208,7 @@ void displayMain (struct foodTag foods[], int foodCount)
         scanf(" %c",&cChoice);
         displayDivider2();
 		
-		res = getChoice(cChoice,foods,foodCount);
+		res = getChoice(cChoice, foods, foodCount);
 		
 	}while(res==-1); //ends loop if invalid input or input is exit
 	
@@ -221,7 +228,7 @@ void addFoodCalories (struct foodTag foods[], int *foodCount)
         getString(temp);
 
         if (checkFoodName(foods, *foodCount, temp) != -1)
-            printf("!   Food exists at index %d   !\n> -- Enter a different name -- <\n", checkFoodName(foods, *foodCount, temp));
+            printf("! Food exists // View Number %d !\n> -- Enter a different name -- <\n", (checkFoodName(foods, *foodCount, temp)) + 1);
         else
             strcpy(foods[i].name, temp);
     } while (checkFoodName(foods, *foodCount, temp) != -1);
@@ -249,21 +256,221 @@ void addFoodCalories (struct foodTag foods[], int *foodCount)
     (*foodCount)++; // increment food count for next entry
 }
 
+char nextFoodEntry(int foodCount)
+{
+    char cChoice;
+
+    printf("|>          Displaying next 10 entries. View more entries not shown?          <|\n");
+    printf("|    Type 'N' to view next set of entries or 'X' to exit View Food Calories    |\n");
+    printf("| %31s Choice: ", " ");
+    while (cChoice != 'N' && cChoice != 'n' && cChoice != 'X' && cChoice != 'x')
+    {
+        scanf(" %c", &cChoice);
+        if (cChoice != 'N' && cChoice != 'n' && cChoice != 'X' && cChoice != 'x')
+        {
+            printf("|    Invalid choice!  Please enter 'N' to view next set or 'X' to exit view    |\n");
+            printf("| %31s Choice: ", " ");
+        }
+    }
+    longDivider();
+
+    return cChoice;
+}
+
 void viewFoodCalories (struct foodTag foods[], int foodCount)
 {
-    /*
-    Display all food entries in a formatted list.
-    */
     int i;
-    
-    for(i=0;i<foodCount;i++)
-	{
-		printf("Food Item #%d: %s\n", i+1, foods[i].name);
-		printf("\t Quantity: %f \n",foods[i].quantity);
-		printf("\t Unit: %s \n",foods[i].unit);
-		printf("\t Calories: %f \n",foods[i].calories);
-	}
-    
+    char cChoice;
+
+    printf("\n");
+    if (foodCount >=10 )
+    {
+        longDivider();
+        printf("|>                        VIEWING FOOD CALORIES PAGE 1                        <|\n");
+        printf("|          Food Item          |   Quantity   |     Unit     |     Calories     |\n");
+        longDivider();
+
+        for(i = 0; i < 9; i++)
+        {
+            printf("| %d. %24s | %12.2f | %12s | %16.2f |\n",
+                i + 1, foods[i].name, foods[i].quantity, foods[i].unit, foods[i].calories);
+        }
+
+        printf("| 10. %23s | %12.2f | %12s | %16.2f |\n",
+                foods[i].name, foods[i].quantity, foods[i].unit, foods[i].calories);
+
+        if (foodCount <= 10)
+        {
+            printf("|>     ----------       VIEW FOOD CALORIE CHART SUCCESS!      ----------      <|\n");
+            longDivider();
+        }
+            
+        if (foodCount >=11)
+        {
+            printf("|>         Displaying first 10 entries. View more entries not shown?          <|\n");
+            printf("|    Type 'N' to view next set of entries or 'X' to exit View Food Calories    |\n");
+            printf("| %31s Choice: ", " ");
+            while (cChoice != 'N' && cChoice != 'n' && cChoice != 'X' && cChoice != 'x')
+            {
+                scanf(" %c", &cChoice);
+                if (cChoice != 'N' && cChoice != 'n' && cChoice != 'X' && cChoice != 'x')
+                {
+                    printf("|    Invalid choice!  Please enter 'N' to view next set or 'X' to exit view    |\n");
+                    printf("| %31s Choice: ", " ");
+                }
+            }
+            longDivider();
+
+            switch (cChoice)
+            {
+                case 'N':
+                case 'n':
+                    longDivider();
+                    printf("|>                        VIEWING FOOD CALORIES PAGE 2                        <|\n");
+                    printf("|          Food Item          |   Quantity   |     Unit     |     Calories     |\n");
+                    longDivider();
+
+                    for(i = 10; i < 20 && i < foodCount; i++)
+                    {
+                        printf("| %d. %23s | %12.2f | %12s | %16.2f |\n",
+                            i + 1, foods[i].name, foods[i].quantity, foods[i].unit, foods[i].calories);
+                    }
+
+                    if (foodCount <= 20)
+                    {
+                        printf("|>     ----------       VIEW FOOD CALORIE CHART SUCCESS!      ----------      <|\n");
+                        longDivider();
+                    }
+
+                    if (foodCount > 20)
+                    {
+                        longDivider();
+                        cChoice = nextFoodEntry(foodCount);
+                        switch (cChoice)
+                        {
+                            case 'N':
+                            case 'n':
+                                longDivider();
+                                printf("|>                        VIEWING FOOD CALORIES PAGE 3                        <|\n");
+                                printf("|          Food Item          |   Quantity   |     Unit     |     Calories     |\n");
+                                longDivider();
+
+                                for(i = 20; i < 30 && i < foodCount; i++)
+                                {
+                                    printf("| %d. %23s | %12.2f | %12s | %16.2f |\n",
+                                        i + 1, foods[i].name, foods[i].quantity, foods[i].unit, foods[i].calories);
+                                }
+
+                                if (foodCount <= 30)
+                                {
+                                    printf("|>     ----------       VIEW FOOD CALORIE CHART SUCCESS!      ----------      <|\n");
+                                    longDivider();
+                                }
+
+                                if (foodCount > 30)
+                                {
+                                    longDivider();
+                                    cChoice = nextFoodEntry(foodCount);
+                                    switch (cChoice)
+                                    {
+                                        case 'N':
+                                        case 'n':
+                                            longDivider();
+                                            printf("|>                        VIEWING FOOD CALORIES PAGE 4                        <|\n");
+                                            printf("|          Food Item          |   Quantity   |     Unit     |     Calories     |\n");
+                                            longDivider();
+
+                                            for(i = 30; i < 40 && i < foodCount; i++)
+                                            {
+                                                printf("| %d. %23s | %12.2f | %12s | %16.2f |\n",
+                                                    i + 1, foods[i].name, foods[i].quantity, foods[i].unit, foods[i].calories);
+                                            }
+
+                                            if (foodCount <= 40)
+                                            {
+                                                printf("|>     ----------       VIEW FOOD CALORIE CHART SUCCESS!      ----------      <|\n");
+                                                longDivider();
+                                            }
+
+                                            if (foodCount > 40)
+                                            {
+                                                longDivider();
+                                                cChoice = nextFoodEntry(foodCount);
+                                                switch (cChoice)
+                                                {
+                                                    case 'N':
+                                                    case 'n':
+                                                        longDivider();
+                                                        printf("|>                        VIEWING FOOD CALORIES PAGE 5                        <|\n");
+                                                        printf("|          Food Item          |   Quantity   |     Unit     |     Calories     |\n");
+                                                        longDivider();
+
+                                                        for(i = 40; i < foodCount; i++)
+                                                        {
+                                                            printf("| %d. %23s | %12.2f | %12s | %16.2f |\n",
+                                                                i + 1, foods[i].name, foods[i].quantity, foods[i].unit, foods[i].calories);
+                                                        }
+                                                        printf("|>     ----------       VIEW FOOD CALORIE CHART SUCCESS!      ----------      <|\n");
+                                                        longDivider();
+                                                    
+                                                        break;
+                                                    case 'X':
+                                                    case 'x':
+                                                        printf("|                        Exiting View Food Calories...                         |\n");
+                                                        longDivider();
+                                                        break;
+                                                }
+                                            }
+                                            break;
+
+                                        case 'X':
+                                        case 'x':
+                                            printf("|                        Exiting View Food Calories...                         |\n");
+                                            longDivider();
+                                            break;
+                                    }
+                                }
+                                break;
+
+                            case 'X':
+                            case 'x':
+                                printf("|                        Exiting View Food Calories...                         |\n");
+                                longDivider();
+                                break;
+                        }
+                    }
+                    break;
+
+                case 'X':
+                case 'x':
+                    printf("|                        Exiting View Food Calories...                         |\n");
+                    longDivider();
+                    break;
+            }
+        }
+    }
+
+    else if (foodCount == 0)
+    {
+        printf("|>     ----------         NO FOOD CALORIE ENTRY!        ----------      <|\n");
+        longDivider();
+    }
+
+    else
+    {
+        longDivider();
+        printf("|>                        VIEWING FOOD CALORIES PAGE 1                        <|\n");
+        printf("|          Food Item          |   Quantity   |     Unit     |     Calories     |\n");
+
+        for(i = 0; i < foodCount; i++)
+        {
+            printf("| %d. %24s | %12.2f | %12s | %16.2f |\n",
+                i + 1, foods[i].name, foods[i].quantity, foods[i].unit, foods[i].calories);
+        }
+
+        printf("|>     ----------       VIEW FOOD CALORIE CHART SUCCESS!      ----------      <|\n");
+        longDivider();
+    }
 }
 
 void saveCalories (struct foodTag foods[], int foodCount)
@@ -273,14 +480,14 @@ void saveCalories (struct foodTag foods[], int foodCount)
     */
 }
 
-int getChoiceUpdate (int nChoice, struct foodTag foods[], int foodCount) 
+int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount) 
 {
-    int res=1;
-    
+    int res = 1;
+
     switch(nChoice)
     {
         case 1:
-            addFoodCalories(foods,&foodCount);
+            addFoodCalories(foods, foodCount);
             printf("==  FOOD ADDED SUCCESSFULLY!  ==\n");
             printf("== Returning to Update Menu.. ==\n");
             displayDivider2();
@@ -294,7 +501,8 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int foodCount)
             res = getChoiceUpdate(nChoice, foods, foodCount);
             break;
         case 2:
-            viewFoodCalories(foods,foodCount);
+            viewFoodCalories(foods, *foodCount);
+            printf("\n");
             updateMenu();
             printf("|%30s|\n", " ");
             printf("|%3s --> Option: ", " ");
@@ -304,7 +512,7 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int foodCount)
             res = getChoiceUpdate(nChoice, foods, foodCount);
             break;
         case 3:
-            saveCalories(foods,foodCount);
+            saveCalories(foods, *foodCount); 
             break;
         case 4:
             //res = loadCalories();
