@@ -642,10 +642,24 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount)
             res = getChoiceUpdate(nChoice, foods, foodCount);
             break;
         case 4:
-            //res = loadCalories();
+            loadCalories(foods, foodCount);
+            updateMenu();
+            printf("|%30s|\n", " ");
+            printf("|%3s --> Option: ", " ");
+            scanf(" %d", &nChoice);
+            printf("|%30s|\n", " ");
+            displayDivider1();
+            res = getChoiceUpdate(nChoice, foods, foodCount);
             break;
         case 5:
-            //res = addReceipe();
+            addRecipe();
+            updateMenu();
+            printf("|%30s|\n", " ");
+            printf("|%3s --> Option: ", " ");
+            scanf(" %d", &nChoice);
+            printf("|%30s|\n", " ");
+            displayDivider1();
+            res = getChoiceUpdate(nChoice, foods, foodCount);
             break;
         case 6:
             //res = modReceipe();
