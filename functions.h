@@ -535,9 +535,65 @@ void loadCalories(struct foodTag foods[], int *foodCount)
     strcat(filename, ".txt");
 
     lCal = fopen(filename,"r");
-    
-    
+}
 
+void addRecipe ()
+{
+    int count = 0;
+    int stepCount = 0;
+    int doneIngredients = 0;
+    int doneSteps = 0;
+    struct recipeTag r;
+
+    longDivider();
+    printf("|>                            ADDING NEW RECIPE...                            <|\n");
+    longDivider();
+
+    printf("--> Enter recipe title: ");
+    getString(r.title);
+    printf("--> Enter recipe classification: ");
+    getString(r.classification);
+    if (strcmp(r.classification, "starter") != 0 && strcmp(r.classification, "main") != 0 && strcmp(r.classification, "dessert") != 0)
+    {
+        do {
+            printf("! Invalid classification. Please enter 'starter', 'main', or 'dessert'. !\n");
+            printf("--> Enter recipe classification: ");
+            getString(r.classification);
+        } while (strcmp(r.classification, "starter") != 0 && strcmp(r.classification, "main") != 0 && strcmp(r.classification, "dessert") != 0);
+    }
+    printf("--> Enter number of servings: ");
+    scanf(" %d", &r.servings);
+    printf("--> Enter ingredients (type 'done' when finished): \n");
+
+    while (count < 20 && !doneIngredients) {
+        printf("Ingredient %d name: ", count + 1);
+        getString(r.ingredients[count].item);
+
+        if (strcmp(r.ingredients[count].item, "done") == 0)
+            doneIngredients = 1;
+
+        else
+        {
+            printf("Ingredient %d quantity: ", count + 1);
+            scanf(" %f", &r.ingredients[count].quantity);
+            printf("Ingredient %d unit: ", count + 1);
+            getString(r.ingredients[count].unit);
+            count++;
+        }
+    }
+
+    printf("--> Enter steps (type 'done' when finished): \n");
+
+    while (stepCount < 15 && !doneSteps) {
+        printf("Step %d: ", stepCount + 1);
+        getString(r.steps[stepCount]);
+
+        if (strcmp(r.steps[stepCount], "done") == 0)
+            doneSteps = 1;
+
+        else
+            stepCount++;
+    }
 }
 
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount) 

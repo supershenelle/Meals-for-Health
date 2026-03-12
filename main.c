@@ -1,16 +1,10 @@
 // run code using: gcc main.c then call ./a.out in terminal
 
+// FOR TESTING: USERNAME AND PASSWORD FOR LOGIN: 'a'
+
 /*
 UPDATE LOG: by shen
-- 2026-03-07: Applied validation for food name input in addFoodCalories() to prevent duplicate entries
-            : Applied validation for quantity input in addFoodCalories() to prevent invalid input and negative numbers
-            : Fixed UI and display
-            : Made option 1 and 2 from updateMenu functional
-            : Finished viewFoodCalories() to display food entries in pages of 10 with option to view next page or exit view
-            : Added testfunctions.c to generate test food entries and test viewFoodCalories() function
-            : viewFoodCalories() now displays message if there are no food entries to show
-            : viewFoodCalories() allows two input choices: 'N' to view next page of entries or 'X' to exit view, with validation for invalid input
-            : viewFoodCalories() displays success message after viewing each page of entries
+- 2026-03-12: Composed addRecipe() to add recipe with title, classification, servings, ingredients and steps
 
 - NOTES/ISSUES
 ! Food name input is case-sensitive, so "Apple" and "apple" would be considered different entries. 
@@ -37,7 +31,6 @@ int main()
     int foodCount = 0;
 
     displayMain(foods, &foodCount);
-    printf("ms nats protein maxxer");
 
     return 0;
 }

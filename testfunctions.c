@@ -36,19 +36,13 @@ static void generateTestFoods(struct foodTag foods[], int *foodCount)
 
 int main(void)
 {
-    struct foodTag foods[MAX_FOODS];
-    struct recipeTag recipes[50]; // ...existing code...
-    int foodCount = 0;
     char again = 'Y';
-
-    (void)recipes; // silence unused warning for now
 
     while (again == 'Y' || again == 'y')
     {
-        generateTestFoods(foods, &foodCount);
-        viewFoodCalories(foods, foodCount);
+        addRecipe();
 
-        printf("\nGenerate another test set? (Y/N): ");
+        printf("\nTest add recipe again? (Y/N): ");
         scanf(" %c", &again);
     }
 
