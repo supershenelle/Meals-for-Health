@@ -36,6 +36,7 @@ int main()
     int foodCount = 0;
 
     displayMain(foods, &foodCount);
+    printf("ms nats protein maxxer");
 
     return 0;
 }
