@@ -478,6 +478,66 @@ void saveCalories (struct foodTag foods[], int foodCount)
     /*
     Save the food entries to a file for later retrieval.
     */
+    FILE *sCal;
+    int i;
+    shortString filename;
+    
+    printf("\n >    SAVING FOOD CALORIES...  < \n");
+    displayDivider2();
+    printf("--> Enter filename to save: ");
+    printf("\n--> ");
+    getString(filename);
+    strcat(filename, ".txt"); // add .txt extension to filename
+
+    sCal = fopen(filename,"w");
+    /*
+    fprintf(sCal, "================================================================================\n");
+    fprintf(sCal, "|                              FOOD CALORIES LIST                              |\n");
+    fprintf(sCal, "================================================================================\n");
+    fprintf(sCal, "|          Food Item          |   Quantity   |     Unit     |     Calories     |\n");
+    fprintf(sCal, "|==============================================================================|\n");
+
+    for(i=0;i<foodCount;i++)
+    {
+         fprintf(sCal, "| %d. %24s | %12.2f | %12s | %16.2f |\n",
+                i + 1, foods[i].name, foods[i].quantity, foods[i].unit, foods[i].calories);
+    }
+
+    fprintf(sCal, "|==============================================================================|\n");
+    fprintf(sCal, "|                    FOOD CALORIE CHART SAVED SUCCESSFULLY!                    |\n");
+    fprintf(sCal, "|==============================================================================|\n");
+    */
+
+    for(i=0;i<foodCount;i++)
+    {
+        fprintf(sCal, "%s\n", foods[i].name);
+        fprintf(sCal, "%.2f %s %.2f\n\n", foods[i].quantity, foods[i].unit, foods[i].calories);
+    }
+
+    fclose(sCal);
+}
+
+void loadCalories(struct foodTag foods[], int *foodCount)
+{
+    /* 
+    Load food entries from a text file and add them to the current list.
+    If a food name already exists, prompt user to overwrite or keep existing data.
+    */
+   FILE *lCal;
+   int i;
+   shortString filename;
+
+    printf("\n >    LOADING FOOD CALORIES...  < \n");
+    displayDivider2();
+    printf("--> Enter filename to load (without .txt): ");
+    printf("\n--> ");
+    getString(filename);
+    strcat(filename, ".txt");
+
+    lCal = fopen(filename,"r");
+    
+    
+
 }
 
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount) 
@@ -513,6 +573,17 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount)
             break;
         case 3:
             saveCalories(foods, *foodCount); 
+            printf("==   FILE SAVED SUCCESSFULLY  ==\n");
+            printf("== Returning to Update Menu.. ==\n");
+            displayDivider2();
+            printf("\n");
+            updateMenu();
+            printf("|%30s|\n", " ");
+            printf("|%3s --> Option: ", " ");
+            scanf(" %d", &nChoice);
+            printf("|%30s|\n", " ");
+            displayDivider1();
+            res = getChoiceUpdate(nChoice, foods, foodCount);
             break;
         case 4:
             //res = loadCalories();

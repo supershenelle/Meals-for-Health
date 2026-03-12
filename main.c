@@ -24,6 +24,7 @@ UPDATE LOG: by marco
 			: Created updatefunctions header
 			: Created getChoiceUpdate() to pick options for updateMenu
 			: Created displayUpdate() to display updateMenu and choices
+            : Created saveCalories() to save inputs
 */
 
 #include <stdio.h>
