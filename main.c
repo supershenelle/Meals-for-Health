@@ -14,11 +14,15 @@ ________________________________________________________________________________
 UPDATE LOG: by marco
 - 2026-03-14: Finished implementing loadCalories() function to load food calorie data from a text file
             : Fixed getChoiceUpdate() to return -1 after each case to loop back to update menu until user chooses to exit
-            : Added getValidIntInput() function to validate integer input for update menu choices
+            : Created getValidIntInput() function to validate integer input for update menu choices
             : Fixed checkfoodName() to be case-insensitive when checking for existing food names
             : Fixed getChoice() to return -1 after each case to loop back to main menu until user chooses to exit
             : Fixed updateMode() to have a do while loop that continues to show update menu until user chooses to exit
             : Added ctype library to functions.h for case-insensitive string comparison in checkFoodName()
+            : Created listRecipes() function to display all recipes with their details
+            : Created checkRecipeTitle() function to check if a recipe with a given title exists
+            : Updated all functions to include recipe parameters where necessary
+            : Created deleteRecipe() function to delete a recipe by title
 */
 
 #include <stdio.h>
@@ -29,8 +33,9 @@ int main()
     struct foodTag foods[50];
     struct recipeTag recipes[50];
     int foodCount = 0;
+    int recipeCount = 0;
 
-    displayMain(foods, &foodCount);
+    displayMain(foods, &foodCount, recipes, recipeCount);
 
     return 0;
 }
