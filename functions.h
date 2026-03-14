@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 // #include "updatefunctions.h"
 
 typedef char longString[71]; //for steps 70 characters
@@ -45,6 +46,24 @@ void longDivider()
 }
 
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount);
+
+void getValidIntInput(int *choice)
+{
+    int valid = 0;
+    int c;
+    do
+    {
+        printf("|%3s --> Option: ", " ");
+        if (scanf(" %d", choice) == 1)
+            valid = 1;
+        else
+        {
+            printf(">  Invalid Option! Try again.  <\n");
+            // Clear input buffer
+            while ((c = getchar()) != '\n' && c != EOF);
+        }
+    } while (!valid);
+}
 
 void getString (shortString str)
 {
@@ -117,13 +136,15 @@ int updateMode (struct foodTag foods[], int *foodCount)
         displayDivider2();
         printf("\n");
 
-        updateMenu();
-        printf("|%30s|\n", " ");
-        printf("|%3s --> Option: ", " ");
-        scanf(" %d", &nChoice);
-        printf("|%30s|\n", " ");
-        displayDivider1();
-        res = getChoiceUpdate(nChoice, foods, foodCount); 
+        do
+        {
+            updateMenu();
+            printf("|%30s|\n", " ");
+            getValidIntInput(&nChoice);
+            printf("|%30s|\n", " ");
+            displayDivider1();
+            res = getChoiceUpdate(nChoice, foods, foodCount); 
+        } while (res == -1); //ends loop if invalid input or input is exit update menu
     }
         
     else
@@ -156,7 +177,7 @@ int checkFoodName (struct foodTag foods[], int foodCount, shortString name)
 
     for (int i = 0; i < foodCount; i++)
     {
-        if (strcmp(foods[i].name, name) == 0)
+        if (strcasecmp(foods[i].name, name) == 0)
             res = i; // return index of existing food
     }
     return res; // not found
@@ -171,6 +192,15 @@ int getChoice (char cChoice, struct foodTag foods[], int *foodCount)
 		case 'U':
 		case 'u':
 			res = updateMode(foods, foodCount);
+            if(res==0)
+            {
+                printf("\n");
+                displayDivider1();
+                printf("|     Exiting Update Menu...   |\n");
+                displayDivider1();
+                printf("\n");
+                res=-1;
+            }
 			break;
 		case 'A':
 		case 'a':
@@ -526,15 +556,89 @@ void loadCalories(struct foodTag foods[], int *foodCount)
    FILE *lCal;
    int i;
    shortString filename;
+   shortString tempName, tempUnit;
+   float tempQty, tempCal;
+   char buffer[100]; // buffer for reading lines from file
+   int existingIndex;
+   char overwriteChoice;
 
-    printf("\n >    LOADING FOOD CALORIES...  < \n");
+    printf("\n>    LOADING FOOD CALORIES...  < \n");
     displayDivider2();
-    printf("--> Enter filename to load (without .txt): ");
+    printf("--> Enter filename to load: ");
     printf("\n--> ");
     getString(filename);
     strcat(filename, ".txt");
 
     lCal = fopen(filename,"r");
+
+    if(lCal == NULL)
+    {
+        printf("! File not found. Please check the filename and try again. !\n");
+        displayDivider2();
+    }
+    else
+    {
+        while(fgets(buffer,sizeof(buffer),lCal) != NULL)
+        {
+            buffer[strcspn(buffer, "\n")] = 0; // remove newline character
+            strcpy(tempName, buffer); // read food name
+
+            if(fgets(buffer,sizeof(buffer),lCal) != NULL)
+            {
+                if(sscanf(buffer, "%f %s %f", &tempQty, tempUnit, &tempCal) == 3) // read quantity, unit, and calories
+                {
+                     fgets(buffer, sizeof(buffer), lCal); // read blank line
+                     existingIndex = checkFoodName(foods, *foodCount, tempName);
+
+                     if(existingIndex != -1) // food name already exists
+                     {
+                        printf("\n! Food '%s' already exists at entry #%d !\n", tempName, existingIndex + 1);
+                        printf("--> Overwrite existing data? (Y/N): ");
+                        
+                        while(overwriteChoice != 'Y' && overwriteChoice != 'y' && overwriteChoice != 'N' && overwriteChoice != 'n')
+                        {
+                            scanf(" %c", &overwriteChoice);
+                            if(overwriteChoice != 'Y' && overwriteChoice != 'y' && overwriteChoice != 'N' && overwriteChoice != 'n')
+                            {
+                                printf("--> Invalid choice! Please enter 'Y' to overwrite or 'N' to keep existing data: ");
+                            }
+                        }
+
+                        if(overwriteChoice == 'Y' || overwriteChoice == 'y')
+                        {
+                            strcpy(foods[existingIndex].name, tempName);
+                            foods[existingIndex].quantity = tempQty;
+                            strcpy(foods[existingIndex].unit, tempUnit);
+                            foods[existingIndex].calories = tempCal;
+                            printf("== Entry #%d overwritten successfully! ==\n", existingIndex + 1);
+                        }
+                        else
+                        {
+                            printf("== Keeping existing entry #%d. Loaded entry skipped. ==\n", existingIndex + 1);
+                        }
+                     }
+
+                     else // food name does not exist, add new entry
+                     {
+                        if(*foodCount < 50) // check if there is space to add new entry
+                        {
+                            strcpy(foods[*foodCount].name, tempName);
+                            foods[*foodCount].quantity = tempQty;
+                            strcpy(foods[*foodCount].unit, tempUnit);
+                            foods[*foodCount].calories = tempCal;
+                            (*foodCount)++;
+                            printf("==  FILE LOADED SUCCESSFULLY  ==\n");
+                        }
+                        else
+                        {
+                            printf("! Food list is full. Cannot add more entries. !\n");
+                        }
+                     }
+
+                }
+            }
+        }
+    }
 }
 
 void addRecipe ()
@@ -608,24 +712,12 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount)
             printf("== Returning to Update Menu.. ==\n");
             displayDivider2();
             printf("\n");
-            updateMenu();
-            printf("|%30s|\n", " ");
-            printf("|%3s --> Option: ", " ");
-            scanf(" %d", &nChoice);
-            printf("|%30s|\n", " ");
-            displayDivider1();
-            res = getChoiceUpdate(nChoice, foods, foodCount);
+            res = -1;
             break;
         case 2:
             viewFoodCalories(foods, *foodCount);
             printf("\n");
-            updateMenu();
-            printf("|%30s|\n", " ");
-            printf("|%3s --> Option: ", " ");
-            scanf(" %d", &nChoice);
-            printf("|%30s|\n", " ");
-            displayDivider1();
-            res = getChoiceUpdate(nChoice, foods, foodCount);
+            res = -1;
             break;
         case 3:
             saveCalories(foods, *foodCount); 
@@ -633,33 +725,21 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount)
             printf("== Returning to Update Menu.. ==\n");
             displayDivider2();
             printf("\n");
-            updateMenu();
-            printf("|%30s|\n", " ");
-            printf("|%3s --> Option: ", " ");
-            scanf(" %d", &nChoice);
-            printf("|%30s|\n", " ");
-            displayDivider1();
-            res = getChoiceUpdate(nChoice, foods, foodCount);
+            res = -1;
             break;
         case 4:
             loadCalories(foods, foodCount);
-            updateMenu();
-            printf("|%30s|\n", " ");
-            printf("|%3s --> Option: ", " ");
-            scanf(" %d", &nChoice);
-            printf("|%30s|\n", " ");
-            displayDivider1();
-            res = getChoiceUpdate(nChoice, foods, foodCount);
+            printf("== Returning to Update Menu.. ==\n");
+            displayDivider2();
+            printf("\n");
+            res = -1;
             break;
         case 5:
             addRecipe();
-            updateMenu();
-            printf("|%30s|\n", " ");
-            printf("|%3s --> Option: ", " ");
-            scanf(" %d", &nChoice);
-            printf("|%30s|\n", " ");
-            displayDivider1();
-            res = getChoiceUpdate(nChoice, foods, foodCount);
+            printf("== Returning to Update Menu.. ==\n");
+            displayDivider2();
+            printf("\n");
+            res = -1;
             break;
         case 6:
             //res = modReceipe();
@@ -683,7 +763,8 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount)
             //res = importReceipe();
             break;
         case 13:
-            displayMain(foods, foodCount);
+            //displayMain(foods, foodCount);
+            res = 0;
             break;
         
         default: 

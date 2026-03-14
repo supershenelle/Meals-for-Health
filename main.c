@@ -12,13 +12,13 @@ UPDATE LOG: by shen
 ____________________________________________________________________________________________________________________________________________________
 
 UPDATE LOG: by marco
-- 2026-03-04: Composed getChoice() to get input from use what mode to do
-			: Composed displayMain() to display mainMenu and choices
-			: Fixed order of updateMode() to fit in with displayMain()
-			: Created updatefunctions header
-			: Created getChoiceUpdate() to pick options for updateMenu
-			: Created displayUpdate() to display updateMenu and choices
-            : Created saveCalories() to save inputs
+- 2026-03-14: Finished implementing loadCalories() function to load food calorie data from a text file
+            : Fixed getChoiceUpdate() to return -1 after each case to loop back to update menu until user chooses to exit
+            : Added getValidIntInput() function to validate integer input for update menu choices
+            : Fixed checkfoodName() to be case-insensitive when checking for existing food names
+            : Fixed getChoice() to return -1 after each case to loop back to main menu until user chooses to exit
+            : Fixed updateMode() to have a do while loop that continues to show update menu until user chooses to exit
+            : Added ctype library to functions.h for case-insensitive string comparison in checkFoodName()
 */
 
 #include <stdio.h>
