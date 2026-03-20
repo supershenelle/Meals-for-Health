@@ -681,6 +681,8 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
 {
     shortString tempTitle;
     int cOpt = -1;
+    int index;
+    int ingredientCount;
 
     if (recipeCount == 0)
     {
@@ -697,40 +699,81 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
         printf("--> Enter recipe title to be modified: ");
         getString(tempTitle);
 
-        if (checkRecipeTitle(recipes, recipeCount, tempTitle) == -1)
+        while (checkRecipeTitle(recipes, recipeCount, tempTitle) == -1)
+        {
+            printf("|>        ----------           RECIPE NOT FOUND!           ----------         <|\n");
+            longDivider();
+            printf("--> Enter recipe title to be modified: ");
+            getString(tempTitle);
+        }
+
+        index = checkRecipeTitle(recipes, recipeCount, tempTitle);
+        printf("|>      ----------       RECIPE FOUND SUCCESSFULLY!       ----------        <|\n");
+        longDivider();
+        printf("|>                      CHOOSE MODIFICATION OPTION.                         <|\n");
+        printf("|>              [1] Add Ingredient    [2] Delete Ingredient                 <|\n");
+        printf("|>                 [3] Add Step          [4] Delete Step                    <|\n");
+        printf("|>                 [5] Return to Update Recipe Box Menu                     <|\n");
+        printf("| Option: ");
+        scanf(" %d", &cOpt);
+
+        if (cOpt == -1)
         {
             do {
-                printf("--> Enter recipe title to be modified: ");
-                getString(tempTitle);
-                if (checkRecipeTitle(recipes, recipeCount, tempTitle) == -1)
-                {
-                    printf("|>        ----------           RECIPE NOT FOUND!           ----------         <|\n");
-                    longDivider();
-                }
-            } while (checkRecipeTitle(recipes, recipeCount, tempTitle) == -1);
-        }
-
-        else
-        {
-            checkRecipeTitle(recipes, recipeCount, tempTitle);
-            printf("|>      ----------       RECIPE FOUND SUCCESSFULLY!       ----------        <|\n");
-            longDivider();
-            printf("|>                      CHOOSE MODIFICATION OPTION.                         <|\n");
-            printf("|>              [1] Add Ingredient    [2] Delete Ingredient                 <|\n");
-            printf("|>                 [3] Add Step          [4] Delete Step                    <|\n");
-            printf("|>                 [5] Return to Update Recipe Box Menu                     <|\n");
+            printf("|>         Invalid option! Please enter a valid modification option.         <|\n");
             printf("| Option: ");
             scanf(" %d", &cOpt);
-
-            if (cOpt == -1)
-            {
-                do {
-                printf("|>         Invalid option! Please enter a valid modification option.         <|\n");
-                printf("| Option: ");
-                scanf(" %d", &cOpt);
-                } while (cOpt == -1);
-            }
+            } while (cOpt == -1);
         }
+
+        switch (cOpt)
+        {
+            case 1:
+            {
+                ingredientCount = 0;
+                while (ingredientCount < 20 &&
+                       recipes[index].ingredients[ingredientCount].item[0] != '\0' &&
+                       strcmp(recipes[index].ingredients[ingredientCount].item, "done") != 0)
+                {
+                    ingredientCount++;
+                }
+
+                if (ingredientCount >= 20)
+                {
+                    printf("|>      ----------        INGREDIENT LIST IS FULL!        ----------        <|\n");
+                    longDivider();
+                }
+                else
+                {
+                    printf("--> Enter ingredient name: ");
+                    getString(recipes[index].ingredients[ingredientCount].item);
+                    printf("--> Enter ingredient quantity: ");
+                    scanf(" %f", &recipes[index].ingredients[ingredientCount].quantity);
+                    printf("--> Enter ingredient unit: ");
+                    getString(recipes[index].ingredients[ingredientCount].unit);
+
+                    if (ingredientCount + 1 < 20)
+                        strcpy(recipes[index].ingredients[ingredientCount + 1].item, "done");
+
+                    printf("|>      ----------      INGREDIENT ADDED SUCCESSFULLY!      ----------      <|\n");
+                    longDivider();
+                }
+                break;
+            }
+            case 2:
+                //deleteIngredient();
+                break;
+            case 3:
+                //addStep();
+                break;
+            case 4:
+                //deleteStep();
+                break;
+            case 5:
+                //return to update recipe box menu
+                break;
+        }
+
     }
 }
 
