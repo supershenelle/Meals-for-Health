@@ -35,7 +35,7 @@ int main()
     int foodCount = 0;
     int recipeCount = 0;
 
-    displayMain(foods, &foodCount, recipes, recipeCount);
+    displayMain(foods, &foodCount, recipes, &recipeCount);
 
     return 0;
 }
