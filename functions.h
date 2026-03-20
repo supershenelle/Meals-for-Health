@@ -805,17 +805,17 @@ void scanRecipe (struct recipeTag recipes[], int *recipeCount)
 
 void searchRecipe (struct recipeTag recipes[], int recipeCount)
 {
-    //scan recipe from file and add to recipe list
+    
 }
 
 void exportRecipe (struct recipeTag recipes[], int recipeCount)
 {
-    //scan recipe from file and add to recipe list
+    
 }
 
 void importRecipe (struct recipeTag recipes[], int *recipeCount)
 {
-    //scan recipe from file and add to recipe list
+   
 }
 
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
