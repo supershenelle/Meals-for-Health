@@ -45,7 +45,7 @@ void longDivider()
     printf("|==============================================================================|\n");
 }
 
-int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int recipeCount);
+int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount);
 
 void getValidIntInput(int *choice)
 {
@@ -116,7 +116,7 @@ void updateMenu ()
     printf("| %2s [13] Exit Update Menu %4s|\n", " ", " ");
 }
 
-int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int recipeCount)
+int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount)
 {
     int res;
     int nChoice;
@@ -195,7 +195,7 @@ int checkRecipeTitle (struct recipeTag recipes[], int recipeCount, shortString t
     return res; // not found
 }
 
-int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int recipeCount) 
+int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
 {
     int res=1;
     
@@ -203,7 +203,7 @@ int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct reci
 	{
 		case 'U':
 		case 'u':
-			res = updateMode(foods, foodCount, recipes, recipeCount);
+            res = updateMode(foods, foodCount, recipes, recipeCount);
             if(res==0)
             {
                 printf("\n");
@@ -238,7 +238,7 @@ int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct reci
 	return res;
 }
 
-void displayMain (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int recipeCount)
+void displayMain (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount)
 {
     char cChoice;
     int res;
@@ -250,7 +250,7 @@ void displayMain (struct foodTag foods[], int *foodCount, struct recipeTag recip
         scanf(" %c",&cChoice);
         displayDivider2();
 		
-		res = getChoice(cChoice, foods, foodCount, recipes, recipeCount);
+        res = getChoice(cChoice, foods, foodCount, recipes, recipeCount);
 		
 	}while(res==-1); //ends loop if invalid input or input is exit
 	
@@ -653,47 +653,46 @@ void loadCalories(struct foodTag foods[], int *foodCount)
     }
 }
 
-void addRecipe () //add struct recipeTag and recipeCount and incoporate in ur func
+void addRecipe (struct recipeTag r[], int *recipeCount)
 {
     int count = 0;
     int stepCount = 0;
     int doneIngredients = 0;
     int doneSteps = 0;
-    struct recipeTag r;
 
     longDivider();
     printf("|>                            ADDING NEW RECIPE...                            <|\n");
     longDivider();
 
     printf("--> Enter recipe title: ");
-    getString(r.title);
+    getString(r[*recipeCount].title);
     printf("--> Enter recipe classification: ");
-    getString(r.classification);
-    if (strcmp(r.classification, "starter") != 0 && strcmp(r.classification, "main") != 0 && strcmp(r.classification, "dessert") != 0)
+    getString(r[*recipeCount].classification);
+    if (strcmp(r[*recipeCount].classification, "starter") != 0 && strcmp(r[*recipeCount].classification, "main") != 0 && strcmp(r[*recipeCount].classification, "dessert") != 0)
     {
         do {
-            printf("! Invalid classification. Please enter 'starter', 'main', or 'dessert'. !\n");
+            printf("!    Invalid classification. Please enter 'starter', 'main', or 'dessert'.    !\n");
             printf("--> Enter recipe classification: ");
-            getString(r.classification);
-        } while (strcmp(r.classification, "starter") != 0 && strcmp(r.classification, "main") != 0 && strcmp(r.classification, "dessert") != 0);
+            getString(r[*recipeCount].classification);
+        } while (strcmp(r[*recipeCount].classification, "starter") != 0 && strcmp(r[*recipeCount].classification, "main") != 0 && strcmp(r[*recipeCount].classification, "dessert") != 0);
     }
     printf("--> Enter number of servings: ");
-    scanf(" %d", &r.servings);
+    scanf(" %d", &r[*recipeCount].servings);
     printf("--> Enter ingredients (type 'done' when finished): \n");
 
     while (count < 20 && !doneIngredients) {
-        printf("Ingredient %d name: ", count + 1);
-        getString(r.ingredients[count].item);
+        printf("--> Ingredient %d name: ", count + 1);
+        getString(r[*recipeCount].ingredients[count].item);
 
-        if (strcmp(r.ingredients[count].item, "done") == 0)
+        if (strcmp(r[*recipeCount].ingredients[count].item, "done") == 0)
             doneIngredients = 1;
 
         else
         {
-            printf("Ingredient %d quantity: ", count + 1);
-            scanf(" %f", &r.ingredients[count].quantity);
-            printf("Ingredient %d unit: ", count + 1);
-            getString(r.ingredients[count].unit);
+            printf("--> Ingredient %d quantity: ", count + 1);
+            scanf(" %f", &r[*recipeCount].ingredients[count].quantity);
+            printf("--> Ingredient %d unit: ", count + 1);
+            getString(r[*recipeCount].ingredients[count].unit);
             count++;
         }
     }
@@ -701,15 +700,16 @@ void addRecipe () //add struct recipeTag and recipeCount and incoporate in ur fu
     printf("--> Enter steps (type 'done' when finished): \n");
 
     while (stepCount < 15 && !doneSteps) {
-        printf("Step %d: ", stepCount + 1);
-        getString(r.steps[stepCount]);
+        printf("--> Step %d: ", stepCount + 1);
+        getString(r[*recipeCount].steps[stepCount]);
 
-        if (strcmp(r.steps[stepCount], "done") == 0)
+        if (strcmp(r[*recipeCount].steps[stepCount], "done") == 0)
             doneSteps = 1;
 
         else
             stepCount++;
     }
+    (*recipeCount)++;
 }
 
 void listRecipe (struct recipeTag recipes[], int recipeCount)
@@ -750,16 +750,17 @@ void listRecipe (struct recipeTag recipes[], int recipeCount)
 
         for(i = 0; i < recipeCount; i++)
         {
-            printf("| %d. %24s | %12s | %12d |\n",
+            printf("| %d. %33s | %18s | %16d |\n",
                 i + 1, recipes[i].title, recipes[i].classification, recipes[i].servings);
         }
 
         printf("|>      ----------       LIST OF FOOD RECIPES SUCCESS!      ----------        <|\n");
         longDivider();
+        printf("\n");
     }
 }
 
-void deleteRecipe (struct recipeTag recipes[], int recipeCount)
+void deleteRecipe (struct recipeTag recipes[], int *recipeCount)
 {
     shortString tempTitle;
     int i,index;
@@ -767,33 +768,33 @@ void deleteRecipe (struct recipeTag recipes[], int recipeCount)
     printf("|>                            DELETING A RECIPE...                            <|\n");
     longDivider();
     
-    if(recipeCount > 0)
+    if(*recipeCount > 0)
     {
-        listRecipe(recipes, recipeCount);
+        listRecipe(recipes, *recipeCount);
         printf("--> Enter recipe title to delete: ");
         getString(tempTitle);
     }
     
-    if(checkRecipeTitle(recipes, recipeCount, tempTitle) == -1)
+    if(checkRecipeTitle(recipes, *recipeCount, tempTitle) == -1)
     {
         printf("|>        ----------           RECIPE NOT FOUND!           ----------         <|\n");
         longDivider();
     }
     else
     {
-        index = checkRecipeTitle(recipes, recipeCount, tempTitle);
-        for(i = index; i < recipeCount - 1; i++)
+        index = checkRecipeTitle(recipes, *recipeCount, tempTitle);
+        for(i = index; i < *recipeCount - 1; i++)
         {
             recipes[i] = recipes[i + 1]; // shift recipes down to overwrite deleted recipe
         }
-        recipeCount--; // decrement recipe count
+        (*recipeCount)--; // decrement recipe count
         printf("|>      ----------       RECIPE DELETED SUCCESSFULLY!       ----------        <|\n");
         longDivider();
     }
 
 }
 
-int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int recipeCount) 
+int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
 {
     int res = 1;
 
@@ -828,7 +829,7 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct
             res = -1;
             break;
         case 5:
-            addRecipe(); //pati here
+            addRecipe(recipes, recipeCount);
             printf("== Returning to Update Menu.. ==\n");
             displayDivider2();
             printf("\n");
@@ -845,7 +846,7 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct
             res = -1;
             break;
         case 8:
-            listRecipe(recipes, recipeCount);
+            listRecipe(recipes, *recipeCount);
             printf("== Returning to Update Menu.. ==\n");
             displayDivider2();
             printf("\n");
