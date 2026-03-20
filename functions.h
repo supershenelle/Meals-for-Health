@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
+#include <strings.h>
 // #include "updatefunctions.h"
 
 typedef char longString[71]; //for steps 70 characters
@@ -301,6 +301,7 @@ void addFoodCalories (struct foodTag foods[], int *foodCount)
 
 char nextFoodEntry(int foodCount)
 {
+    (void)foodCount;
     char cChoice;
 
     printf("|>          Displaying next 10 entries. View more entries not shown?          <|\n");
@@ -567,7 +568,6 @@ void loadCalories(struct foodTag foods[], int *foodCount)
     If a food name already exists, prompt user to overwrite or keep existing data.
     */
    FILE *lCal;
-   int i;
    shortString filename;
    shortString tempName, tempUnit;
    float tempQty, tempCal;
@@ -716,8 +716,6 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
 void modifyRecipe (struct recipeTag recipes[], int recipeCount)
 {
     shortString tempTitle;
-    int index = -1;
-    int i;
     int cOpt = -1;
 
     if (recipeCount == 0)
@@ -750,7 +748,7 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
 
         else
         {
-            index = checkRecipeTitle(recipes, recipeCount, tempTitle);
+            checkRecipeTitle(recipes, recipeCount, tempTitle);
             printf("|>      ----------       RECIPE FOUND SUCCESSFULLY!       ----------        <|\n");
             longDivider();
             printf("|>                      CHOOSE MODIFICATION OPTION.                         <|\n");
