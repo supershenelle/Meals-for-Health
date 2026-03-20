@@ -653,7 +653,7 @@ void loadCalories(struct foodTag foods[], int *foodCount)
     }
 }
 
-void addRecipe (struct recipeTag r[], int *recipeCount)
+void addRecipe (struct recipeTag recipes[], int *recipeCount)
 {
     int count = 0;
     int stepCount = 0;
@@ -665,34 +665,34 @@ void addRecipe (struct recipeTag r[], int *recipeCount)
     longDivider();
 
     printf("--> Enter recipe title: ");
-    getString(r[*recipeCount].title);
+    getString(recipes[*recipeCount].title);
     printf("--> Enter recipe classification: ");
-    getString(r[*recipeCount].classification);
-    if (strcmp(r[*recipeCount].classification, "starter") != 0 && strcmp(r[*recipeCount].classification, "main") != 0 && strcmp(r[*recipeCount].classification, "dessert") != 0)
+    getString(recipes[*recipeCount].classification);
+    if (strcmp(recipes[*recipeCount].classification, "starter") != 0 && strcmp(recipes[*recipeCount].classification, "main") != 0 && strcmp(recipes[*recipeCount].classification, "dessert") != 0)
     {
         do {
             printf("!    Invalid classification. Please enter 'starter', 'main', or 'dessert'.    !\n");
             printf("--> Enter recipe classification: ");
-            getString(r[*recipeCount].classification);
-        } while (strcmp(r[*recipeCount].classification, "starter") != 0 && strcmp(r[*recipeCount].classification, "main") != 0 && strcmp(r[*recipeCount].classification, "dessert") != 0);
+            getString(recipes[*recipeCount].classification);
+        } while (strcmp(recipes[*recipeCount].classification, "starter") != 0 && strcmp(recipes[*recipeCount].classification, "main") != 0 && strcmp(recipes[*recipeCount].classification, "dessert") != 0);
     }
     printf("--> Enter number of servings: ");
-    scanf(" %d", &r[*recipeCount].servings);
+    scanf(" %d", &recipes[*recipeCount].servings);
     printf("--> Enter ingredients (type 'done' when finished): \n");
 
     while (count < 20 && !doneIngredients) {
         printf("--> Ingredient %d name: ", count + 1);
-        getString(r[*recipeCount].ingredients[count].item);
+        getString(recipes[*recipeCount].ingredients[count].item);
 
-        if (strcmp(r[*recipeCount].ingredients[count].item, "done") == 0)
+        if (strcmp(recipes[*recipeCount].ingredients[count].item, "done") == 0)
             doneIngredients = 1;
 
         else
         {
             printf("--> Ingredient %d quantity: ", count + 1);
-            scanf(" %f", &r[*recipeCount].ingredients[count].quantity);
+            scanf(" %f", &recipes[*recipeCount].ingredients[count].quantity);
             printf("--> Ingredient %d unit: ", count + 1);
-            getString(r[*recipeCount].ingredients[count].unit);
+            getString(recipes[*recipeCount].ingredients[count].unit);
             count++;
         }
     }
@@ -701,15 +701,54 @@ void addRecipe (struct recipeTag r[], int *recipeCount)
 
     while (stepCount < 15 && !doneSteps) {
         printf("--> Step %d: ", stepCount + 1);
-        getString(r[*recipeCount].steps[stepCount]);
+        getString(recipes[*recipeCount].steps[stepCount]);
 
-        if (strcmp(r[*recipeCount].steps[stepCount], "done") == 0)
+        if (strcmp(recipes[*recipeCount].steps[stepCount], "done") == 0)
             doneSteps = 1;
 
         else
             stepCount++;
     }
     (*recipeCount)++;
+}
+
+void modifyRecipe (struct recipeTag recipes[], int recipeCount)
+{
+    shortString tempTitle;
+    int index = -1;
+    int i;
+
+    if (recipeCount == 0)
+    {
+        printf("|>      ----------          NO FOOD RECIPES FOUND!          ----------       <|\n");
+        printf("|>      --------           RETURNING TO UPDATE MENU           --------        |\n");
+        longDivider();
+    }
+    
+    else
+    {
+        listRecipe(recipes, recipeCount);
+        printf("/n");
+        longDivider();
+        printf("--> Enter recipe title to be modified: ");
+        getString(tempTitle);
+
+        for (i = 0; i < recipeCount; i++)
+        {
+            if (strcmp(recipes[i].title, tempTitle) == 0)
+                index = i;
+
+            else
+            {
+                printf("|>        ----------           RECIPE NOT FOUND!           ----------         <|\n");
+                longDivider();
+                return;
+            } // fix this implement recipe title to ask until valid
+        }
+
+        // allow user to modify any of the fields (title, classification, servings, ingredients, steps)
+        // for ingredients and steps, allow user to add/remove items or modify existing items
+    }
 }
 
 void listRecipe (struct recipeTag recipes[], int recipeCount)
