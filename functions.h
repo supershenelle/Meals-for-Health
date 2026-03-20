@@ -46,6 +46,7 @@ void longDivider()
 }
 
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount);
+void listRecipe (struct recipeTag recipes[], int recipeCount);
 
 void getValidIntInput(int *choice)
 {
@@ -717,6 +718,7 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
     shortString tempTitle;
     int index = -1;
     int i;
+    int cOpt = -1;
 
     if (recipeCount == 0)
     {
@@ -733,21 +735,40 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
         printf("--> Enter recipe title to be modified: ");
         getString(tempTitle);
 
-        for (i = 0; i < recipeCount; i++)
+        if (checkRecipeTitle(recipes, recipeCount, tempTitle) == -1)
         {
-            if (strcmp(recipes[i].title, tempTitle) == 0)
-                index = i;
-
-            else
-            {
-                printf("|>        ----------           RECIPE NOT FOUND!           ----------         <|\n");
-                longDivider();
-                return;
-            } // fix this implement recipe title to ask until valid
+            do {
+                printf("--> Enter recipe title to be modified: ");
+                getString(tempTitle);
+                if (checkRecipeTitle(recipes, recipeCount, tempTitle) == -1)
+                {
+                    printf("|>        ----------           RECIPE NOT FOUND!           ----------         <|\n");
+                    longDivider();
+                }
+            } while (checkRecipeTitle(recipes, recipeCount, tempTitle) == -1);
         }
 
-        // allow user to modify any of the fields (title, classification, servings, ingredients, steps)
-        // for ingredients and steps, allow user to add/remove items or modify existing items
+        else
+        {
+            index = checkRecipeTitle(recipes, recipeCount, tempTitle);
+            printf("|>      ----------       RECIPE FOUND SUCCESSFULLY!       ----------        <|\n");
+            longDivider();
+            printf("|>                      CHOOSE MODIFICATION OPTION.                         <|\n");
+            printf("|>              [1] Add Ingredient    [2] Delete Ingredient                 <|\n");
+            printf("|>                 [3] Add Step          [4] Delete Step                    <|\n");
+            printf("|>                 [5] Return to Update Recipe Box Menu                     <|\n");
+            printf("| Option: ");
+            scanf(" %d", &cOpt);
+
+            if (cOpt == -1)
+            {
+                do {
+                printf("|>         Invalid option! Please enter a valid modification option.         <|\n");
+                printf("| Option: ");
+                scanf(" %d", &cOpt);
+                } while (cOpt == -1);
+            }
+        }
     }
 }
 
