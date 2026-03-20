@@ -532,23 +532,6 @@ void saveCalories (struct foodTag foods[], int foodCount)
     strcat(filename, ".txt"); // add .txt extension to filename
 
     sCal = fopen(filename,"w");
-    /*
-    fprintf(sCal, "================================================================================\n");
-    fprintf(sCal, "|                              FOOD CALORIES LIST                              |\n");
-    fprintf(sCal, "================================================================================\n");
-    fprintf(sCal, "|          Food Item          |   Quantity   |     Unit     |     Calories     |\n");
-    fprintf(sCal, "|==============================================================================|\n");
-
-    for(i=0;i<foodCount;i++)
-    {
-         fprintf(sCal, "| %d. %24s | %12.2f | %12s | %16.2f |\n",
-                i + 1, foods[i].name, foods[i].quantity, foods[i].unit, foods[i].calories);
-    }
-
-    fprintf(sCal, "|==============================================================================|\n");
-    fprintf(sCal, "|                    FOOD CALORIE CHART SAVED SUCCESSFULLY!                    |\n");
-    fprintf(sCal, "|==============================================================================|\n");
-    */
 
     for(i=0;i<foodCount;i++)
     {
@@ -568,18 +551,14 @@ void loadCalories(struct foodTag foods[], int *foodCount)
    FILE *lCal;
    int i;
    shortString filename;
-   shortString tempName, tempUnit;
-   float tempQty, tempCal;
-   char buffer[100]; // buffer for reading lines from file
    int existingIndex;
    char overwriteChoice;
 
     printf("\n>    LOADING FOOD CALORIES...  < \n");
     displayDivider2();
-    printf("--> Enter filename to load: ");
+    printf("--> Enter filename to load(with .txt): ");
     printf("\n--> ");
     getString(filename);
-    strcat(filename, ".txt");
 
     lCal = fopen(filename,"r");
 
@@ -590,67 +569,52 @@ void loadCalories(struct foodTag foods[], int *foodCount)
     }
     else
     {
-        while(fgets(buffer,sizeof(buffer),lCal) != NULL)
+        while (*foodCount < 50 && !feof(lCal))
         {
-            buffer[strcspn(buffer, "\n")] = 0; // remove newline character
-            strcpy(tempName, buffer); // read food name
-
-            if(fgets(buffer,sizeof(buffer),lCal) != NULL)
+            fscanf(lCal, " %20[^\n]", foods[*foodCount].name);
+            fscanf(lCal, "%*c");  // consume the \n after name
+    
+            // Read qty, unit, calories directly to struct fields
+            fscanf(lCal, " %f %20s %f", &foods[*foodCount].quantity, 
+                                         foods[*foodCount].unit, 
+                                         &foods[*foodCount].calories);
+                
+            fscanf(lCal, "%*c");  // consume the \n after data
+            fscanf(lCal, "%*c");  // consume blank line \n
+                
+            // Check for duplicates
+            existingIndex = checkFoodName(foods, *foodCount, foods[*foodCount].name);
+                
+            if (existingIndex != -1)  // food name already exists
             {
-                if(sscanf(buffer, "%f %s %f", &tempQty, tempUnit, &tempCal) == 3) // read quantity, unit, and calories
+                printf("\n! Food '%s' already exists at entry #%d !\n", foods[*foodCount].name, existingIndex + 1);
+                printf("--> Overwrite existing data? (Y/N): ");
+                    
+                overwriteChoice = '\0';
+                while (overwriteChoice != 'Y' && overwriteChoice != 'y' && overwriteChoice != 'N' && overwriteChoice != 'n')
                 {
-                     fgets(buffer, sizeof(buffer), lCal); // read blank line
-                     existingIndex = checkFoodName(foods, *foodCount, tempName);
-
-                     if(existingIndex != -1) // food name already exists
-                     {
-                        printf("\n! Food '%s' already exists at entry #%d !\n", tempName, existingIndex + 1);
-                        printf("--> Overwrite existing data? (Y/N): ");
-                        
-                        while(overwriteChoice != 'Y' && overwriteChoice != 'y' && overwriteChoice != 'N' && overwriteChoice != 'n')
-                        {
-                            scanf(" %c", &overwriteChoice);
-                            if(overwriteChoice != 'Y' && overwriteChoice != 'y' && overwriteChoice != 'N' && overwriteChoice != 'n')
-                            {
-                                printf("--> Invalid choice! Please enter 'Y' to overwrite or 'N' to keep existing data: ");
-                            }
-                        }
-
-                        if(overwriteChoice == 'Y' || overwriteChoice == 'y')
-                        {
-                            strcpy(foods[existingIndex].name, tempName);
-                            foods[existingIndex].quantity = tempQty;
-                            strcpy(foods[existingIndex].unit, tempUnit);
-                            foods[existingIndex].calories = tempCal;
-                            printf("== Entry #%d overwritten successfully! ==\n", existingIndex + 1);
-                        }
-                        else
-                        {
-                            printf("== Keeping existing entry #%d. Loaded entry skipped. ==\n", existingIndex + 1);
-                        }
-                     }
-
-                     else // food name does not exist, add new entry
-                     {
-                        if(*foodCount < 50) // check if there is space to add new entry
-                        {
-                            strcpy(foods[*foodCount].name, tempName);
-                            foods[*foodCount].quantity = tempQty;
-                            strcpy(foods[*foodCount].unit, tempUnit);
-                            foods[*foodCount].calories = tempCal;
-                            (*foodCount)++;
-                            printf("==  FILE LOADED SUCCESSFULLY  ==\n");
-                        }
-                        else
-                        {
-                            printf("! Food list is full. Cannot add more entries. !\n");
-                        }
-                     }
-
+                    scanf(" %c", &overwriteChoice);
                 }
+                
+                if (overwriteChoice == 'Y' || overwriteChoice == 'y')
+                {
+                    foods[existingIndex].quantity = foods[*foodCount].quantity;
+                    strcpy(foods[existingIndex].unit, foods[*foodCount].unit);
+                    foods[existingIndex].calories = foods[*foodCount].calories;
+                    printf("== Entry #%d overwritten successfully! ==\n", existingIndex + 1);
+                }
+                else
+                        printf("== Keeping existing entry #%d. Loaded entry skipped. ==\n", existingIndex + 1);
+            }
+            else  // food name does not exist, add new entry
+            {
+                (*foodCount)++;
+                printf("== Food '%s' loaded successfully! ==\n", foods[*foodCount - 1].name);
             }
         }
     }
+        
+    fclose(lCal);
 }
 
 void addRecipe () //add struct recipeTag and recipeCount and incoporate in ur func
@@ -763,6 +727,7 @@ void deleteRecipe (struct recipeTag recipes[], int recipeCount)
 {
     shortString tempTitle;
     int i,index;
+
     longDivider();
     printf("|>                            DELETING A RECIPE...                            <|\n");
     longDivider();
@@ -791,6 +756,26 @@ void deleteRecipe (struct recipeTag recipes[], int recipeCount)
         longDivider();
     }
 
+}
+
+void scanRecipe (struct recipeTag recipes[], int *recipeCount)
+{
+    //scan recipe from file and add to recipe list
+}
+
+void searchRecipe (struct recipeTag recipes[], int recipeCount)
+{
+    //scan recipe from file and add to recipe list
+}
+
+void exportRecipe (struct recipeTag recipes[], int recipeCount)
+{
+    //scan recipe from file and add to recipe list
+}
+
+void importRecipe (struct recipeTag recipes[], int *recipeCount)
+{
+    //scan recipe from file and add to recipe list
 }
 
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int recipeCount) 
@@ -852,16 +837,32 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct
             res = -1;
             break;
         case 9:
-            //res = scanReceipe();
+            scanRecipe(recipes, &recipeCount);
+            printf("== Returning to Update Menu.. ==\n");
+            displayDivider2();
+            printf("\n");
+            res = -1;
             break;
         case 10:
-            //res = searchReceipe();
+            searchRecipe(recipes, recipeCount);
+            printf("== Returning to Update Menu.. ==\n");
+            displayDivider2();
+            printf("\n");
+            res = -1;
             break;
         case 11:
-            //res = exportReceipe();
+            exportRecipe(recipes, recipeCount);
+            printf("== Returning to Update Menu.. ==\n");
+            displayDivider2();
+            printf("\n");
+            res = -1;
             break;
         case 12:
-            //res = importReceipe();
+            importRecipe(recipes, &recipeCount);
+            printf("== Returning to Update Menu.. ==\n");
+            displayDivider2();
+            printf("\n");
+            res = -1;
             break;
         case 13:
             //displayMain(foods, foodCount);
