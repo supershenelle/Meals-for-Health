@@ -2,47 +2,73 @@
 #include "functions.h"
 
 // =====================================================================================================
-// TEST FUNCTION FOR VIEW FOOD CALORIES
-#define MAX_FOODS 50
+// TEST FUNCTION FOR MODIFY RECIPE
 
-static void clearInputBuffer(void)
+static void initRecipe(struct recipeTag *recipe,
+                       const char *title,
+                       const char *classification,
+                       int servings)
 {
-    int ch;
-    while ((ch = getchar()) != '\n' && ch != EOF) { }
+    int i;
+
+    strcpy(recipe->title, title);
+    strcpy(recipe->classification, classification);
+    recipe->servings = servings;
+
+    for (i = 0; i < 20; i++)
+    {
+        recipe->ingredients[i].item[0] = '\0';
+        recipe->ingredients[i].quantity = 0.0f;
+        recipe->ingredients[i].unit[0] = '\0';
+    }
+
+    for (i = 0; i < 15; i++)
+        recipe->steps[i][0] = '\0';
 }
 
-static void generateTestFoods(struct foodTag foods[], int *foodCount)
+static void seedTestRecipes(struct recipeTag recipes[], int *recipeCount)
 {
-    int n, i;
+    *recipeCount = 2;
 
-    printf("Enter number of test foods (0-%d): ", MAX_FOODS);
-    while (scanf(" %d", &n) != 1 || n < 0 || n > MAX_FOODS)
-    {
-        printf("Invalid input. Enter 0-%d: ", MAX_FOODS);
-        clearInputBuffer();
-    }
+    initRecipe(&recipes[0], "pasta", "main", 2);
+    strcpy(recipes[0].ingredients[0].item, "pasta");
+    recipes[0].ingredients[0].quantity = 200.0f;
+    strcpy(recipes[0].ingredients[0].unit, "grams");
+    strcpy(recipes[0].ingredients[1].item, "salt");
+    recipes[0].ingredients[1].quantity = 5.0f;
+    strcpy(recipes[0].ingredients[1].unit, "grams");
+    strcpy(recipes[0].ingredients[2].item, "done");
 
-    *foodCount = n;
+    strcpy(recipes[0].steps[0], "boil water");
+    strcpy(recipes[0].steps[1], "cook pasta");
+    strcpy(recipes[0].steps[2], "done");
 
-    for (i = 0; i < n; i++)
-    {
-        // jumbled-looking short names
-        snprintf(foods[i].name, sizeof(foods[i].name), "xq%dz%d", i + 1, (i * 7) % 97);
-        foods[i].quantity = (float)((i % 9) + 1) * 10.0f;
-        strcpy(foods[i].unit, "grams");
-        foods[i].calories = 80.0f + (float)((i * 13) % 250);
-    }
+    initRecipe(&recipes[1], "fruitcup", "dessert", 1);
+    strcpy(recipes[1].ingredients[0].item, "apple");
+    recipes[1].ingredients[0].quantity = 1.0f;
+    strcpy(recipes[1].ingredients[0].unit, "piece");
+    strcpy(recipes[1].ingredients[1].item, "done");
+
+    strcpy(recipes[1].steps[0], "slice fruit");
+    strcpy(recipes[1].steps[1], "serve");
+    strcpy(recipes[1].steps[2], "done");
 }
 
 int main(void)
 {
+    struct recipeTag recipes[50];
+    int recipeCount = 0;
     char again = 'Y';
+
+    seedTestRecipes(recipes, &recipeCount);
+    printf("\nLoaded %d sample recipes for modifyRecipe() testing.\n", recipeCount);
 
     while (again == 'Y' || again == 'y')
     {
-        addRecipe();
+        modifyRecipe(recipes, recipeCount);
+        listRecipe(recipes, recipeCount);
 
-        printf("\nTest add recipe again? (Y/N): ");
+        printf("\nTest modify recipe again? (Y/N): ");
         scanf(" %c", &again);
     }
 

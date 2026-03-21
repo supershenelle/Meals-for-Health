@@ -677,24 +677,121 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
     (*recipeCount)++;
 }
 
+int checkIngredient (shortString ingredient, struct recipeTag recipes[], int nIndex)
+{
+    int res = -1;
+    int i;
+
+    for (i = 0; i < 20; i++)
+    {
+        if (strcasecmp(recipes[nIndex].ingredients[i].item, ingredient) == 0)
+            res = i;
+    }
+    return res; 
+}
+
+void deleteIngredient (shortString ingredient, struct recipeTag recipes[], int nIndex)
+{
+    int i;
+    int ingredientIndex = checkIngredient(ingredient, recipes, nIndex);
+    int lastIngredient = 0;
+
+    while (lastIngredient < 20 && recipes[nIndex].ingredients[lastIngredient].item[0] != '\0')
+    {
+        lastIngredient++;
+    }
+
+    if (ingredientIndex != -1)
+    {
+        for (i = ingredientIndex; i < lastIngredient; i++)
+        { // shift ingredients  
+            recipes[nIndex].ingredients[i] = recipes[nIndex].ingredients[i + 1];
+        }
+        
+        // delete all info
+        recipes[nIndex].ingredients[lastIngredient - 1].item[0] = '\0';
+        recipes[nIndex].ingredients[lastIngredient - 1].quantity = 0.0f;
+        recipes[nIndex].ingredients[lastIngredient - 1].unit[0] = '\0';
+    }
+}
+
+void listIngredients (struct recipeTag recipes[], int nIndex)
+{
+    int i, j;
+
+    longDivider();
+    printf("|>       ----------       LIST OF EXISTING INGREDIENTS       ----------       <|\n");
+    longDivider();
+    printf("|          Ingredient Name            |     Quantity     |        Unit         |\n");
+    longDivider();
+
+    for (i = 0; i < 20 && recipes[nIndex].ingredients[i].item[0] != '\0' && strcmp(recipes[nIndex].ingredients[i].item, "done") != 0; i++)
+    {
+        printf("| %d. %32s | %16.2f | %19s |\n",
+            i + 1, recipes[nIndex].ingredients[i].item, recipes[nIndex].ingredients[i].quantity, recipes[nIndex].ingredients[i].unit);
+    }
+}
+
+void listSteps (struct recipeTag recipes[], int nIndex)
+{
+    int i;
+    int lastStep = 0;
+
+    // [lastStep] index of laststep [0] first character of step  
+    while (lastStep < 15 && recipes[nIndex].steps[lastStep][0] != '\0' && strcmp(recipes[nIndex].steps[lastStep], "done") != 0)
+    {
+        lastStep++;
+    }
+
+    longDivider();
+    printf("|>         ----------         LIST OF EXISTING STEPS         ----------       <|\n");
+    longDivider();
+
+    for (i = 0; i < lastStep; i++)
+    {
+        printf("| %d. %73s |\n", i + 1, recipes[nIndex].steps[i]);
+    }
+}
+
+void deleteStep (int nStep, struct recipeTag recipes[], int nIndex)
+{
+    int i;
+    int lastStep = 0;
+
+    while (lastStep < 15 && recipes[nIndex].steps[lastStep][0] != '\0' && strcmp(recipes[nIndex].steps[lastStep], "done") != 0)
+    {
+        lastStep++;
+    }
+
+    for (i = nStep - 1; i < lastStep - 1; i++)
+    { // shift steps
+        strcpy(recipes[nIndex].steps[i], recipes[nIndex].steps[i + 1]);
+    }
+
+    // delete last step info
+    recipes[nIndex].steps[lastStep - 1][0] = '\0';
+}
+
 void modifyRecipe (struct recipeTag recipes[], int recipeCount)
 {
-    shortString tempTitle;
+    shortString tempTitle, tempIngredient;
     int cOpt = -1;
     int index;
-    int ingredientCount;
+    int ingredientCount, stepCount, nStep; //nstep index of step to be deleted
 
     if (recipeCount == 0)
     {
-        printf("|>      ----------          NO FOOD RECIPES FOUND!          ----------       <|\n");
-        printf("|>      --------           RETURNING TO UPDATE MENU           --------        |\n");
+        printf("\n");
+        longDivider();
+        printf("|>      ----------           NO FOOD RECIPES FOUND!          ----------       <|\n");
+        printf("|>      --------            RETURNING TO UPDATE MENU           --------        |\n");
         longDivider();
     }
     
     else
     {
         listRecipe(recipes, recipeCount);
-        printf("/n");
+        printf("\n");
         longDivider();
         printf("--> Enter recipe title to be modified: ");
         getString(tempTitle);
@@ -708,43 +805,50 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
         }
 
         index = checkRecipeTitle(recipes, recipeCount, tempTitle);
-        printf("|>      ----------       RECIPE FOUND SUCCESSFULLY!       ----------        <|\n");
-        longDivider();
-        printf("|>                      CHOOSE MODIFICATION OPTION.                         <|\n");
-        printf("|>              [1] Add Ingredient    [2] Delete Ingredient                 <|\n");
-        printf("|>                 [3] Add Step          [4] Delete Step                    <|\n");
-        printf("|>                 [5] Return to Update Recipe Box Menu                     <|\n");
-        printf("| Option: ");
-        scanf(" %d", &cOpt);
-
-        if (cOpt == -1)
+        do
         {
-            do {
-            printf("|>         Invalid option! Please enter a valid modification option.         <|\n");
+            longDivider();
+            printf("\n|>       ----------       RECIPE FOUND SUCCESSFULLY!       ----------         <|\n");
+            longDivider();
+            printf("|>                       CHOOSE MODIFICATION OPTION.                          <|\n");
+            printf("|>               [1] Add Ingredient    [2] Delete Ingredient                  <|\n");
+            printf("|>                  [3] Add Step          [4] Delete Step                     <|\n");
+            printf("|>                  [5] Return to Update Recipe Box Menu                      <|\n");
             printf("| Option: ");
             scanf(" %d", &cOpt);
-            } while (cOpt == -1);
-        }
 
-        switch (cOpt)
-        {
-            case 1:
+            while (cOpt < 1 || cOpt > 5)
             {
+                printf("|>         Invalid option! Please enter a valid modification option.          <|\n");
+                printf("| Option: ");
+                scanf(" %d", &cOpt);
+            }
+
+            longDivider();
+            printf("\n");
+
+            switch (cOpt)
+            {
+            case 1:
                 ingredientCount = 0;
-                while (ingredientCount < 20 &&
-                       recipes[index].ingredients[ingredientCount].item[0] != '\0' &&
-                       strcmp(recipes[index].ingredients[ingredientCount].item, "done") != 0)
+                while (ingredientCount < 20 && // if max na
+                       recipes[index].ingredients[ingredientCount].item[0] != '\0' && // if walang item
+                       strcmp(recipes[index].ingredients[ingredientCount].item, "done") != 0) // if hindi done
                 {
                     ingredientCount++;
                 }
 
                 if (ingredientCount >= 20)
                 {
-                    printf("|>      ----------        INGREDIENT LIST IS FULL!        ----------        <|\n");
+                    printf("|>      ----------         INGREDIENT LIST IS FULL!         ----------        <|\n");
                     longDivider();
                 }
+
                 else
                 {
+                    listIngredients(recipes, index);
+                    printf("|                            ADDING NEW INGREDIENT                             |\n");
+                    longDivider();
                     printf("--> Enter ingredient name: ");
                     getString(recipes[index].ingredients[ingredientCount].item);
                     printf("--> Enter ingredient quantity: ");
@@ -755,24 +859,124 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
                     if (ingredientCount + 1 < 20)
                         strcpy(recipes[index].ingredients[ingredientCount + 1].item, "done");
 
-                    printf("|>      ----------      INGREDIENT ADDED SUCCESSFULLY!      ----------      <|\n");
+                    printf("|>      ----------       INGREDIENT ADDED SUCCESSFULLY!       ----------      <|\n");
+                    listIngredients(recipes, index);
                     longDivider();
                 }
                 break;
-            }
+
             case 2:
-                //deleteIngredient();
+                ingredientCount = 0;
+                while (ingredientCount < 20 && // if max na
+                       recipes[index].ingredients[ingredientCount].item[0] != '\0' && // if walang item
+                       strcmp(recipes[index].ingredients[ingredientCount].item, "done") != 0) // if hindi done
+                {
+                    ingredientCount++;
+                }
+
+                if (ingredientCount == 0)
+                {
+                    printf("|>      ----------         NO INGREDIENTS TO DELETE!        ----------        <|\n");
+                    longDivider();
+                }
+
+                else
+                {
+                    listIngredients(recipes, index);
+                    printf("|                            DELETING AN INGREDIENT                            |\n");
+                    printf("--> Enter ingredient name to delete: ");
+                    getString(tempIngredient);
+
+                    if (checkIngredient(tempIngredient, recipes, index) == -1)
+                    {
+                        do {
+                            printf("|>        ----------          INGREDIENT NOT FOUND!         ----------        <|\n");
+                            longDivider();
+                            printf("--> Enter ingredient name to delete: ");
+                            getString(tempIngredient);
+                        } while (checkIngredient(tempIngredient, recipes, index) == -1);
+                    }
+
+                    deleteIngredient(tempIngredient, recipes, index);
+                    printf("|>     ----------       INGREDIENT DELETED SUCCESSFULLY!       ----------     <|\n");
+                    listIngredients(recipes, index);
+                    longDivider();
+                }
                 break;
+
             case 3:
-                //addStep();
+                stepCount = 0;
+                while (stepCount < 15 && // if max na
+                      recipes[index].steps[stepCount][0] != '\0' && // if walang step
+                      strcmp(recipes[index].steps[stepCount], "done") != 0) // if hindi done
+                {
+                    stepCount++;
+                }
+
+                if (stepCount == 15)
+                {
+                    printf("|>      ----------           STEP COUNT IS FULL!           ----------        <|\n");
+                    longDivider();
+                }
+
+                else
+                {
+                    listSteps(recipes, index);
+                    printf("|                                ADDING NEW STEP                               |\n");
+                    longDivider();
+                    printf("--> Enter step: ");
+                    getString(recipes[index].steps[stepCount]);
+                    printf("|>        ----------        STEP ADDED SUCCESSFULLY!       ----------        <|\n");
+                    listSteps(recipes, index);
+                    longDivider();
+                }
                 break;
+
             case 4:
-                //deleteStep();
+                stepCount = 0;
+                while (stepCount < 15 && // if max na
+                      recipes[index].steps[stepCount][0] != '\0' && // if walang step
+                      strcmp(recipes[index].steps[stepCount], "done") != 0) // if hindi done
+                {
+                    stepCount++;
+                }
+
+                if (stepCount == 0)
+                {
+                    printf("|>       ----------           NO STEPS TO DELETE!          ----------         <|\n");
+                    longDivider();
+                }
+
+                else
+                {
+                    listSteps(recipes, index);
+                    printf("|                               DELETING A STEP                                |\n");
+                    printf("--> Enter the step number to delete: ");
+                    scanf(" %d", &nStep);
+
+                    if (nStep < 1 || nStep > stepCount)
+                    {
+                        do {
+                            printf("|>        ----------          INVALID STEP NUMBER!         ----------        <|\n");
+                            longDivider();
+                            printf("--> Enter the step number to delete: ");
+                            scanf(" %d", &nStep);
+                        } while (nStep < 1 || nStep > stepCount);
+                    }
+
+                    deleteStep(nStep, recipes, index);
+                    printf("|>     ----------       STEP DELETED SUCCESSFULLY!       ----------     <|\n");
+                    listSteps(recipes, index);
+                    longDivider();
+                }
                 break;
+
             case 5:
-                //return to update recipe box menu
+                printf("|>      --------          RETURNING TO UPDATE MENU...         --------        <|\n");
+                longDivider();
                 break;
-        }
+            }
+        } while (cOpt != 5);
 
     }
 }
@@ -922,7 +1126,9 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct
             res = -1;
             break;
         case 6:
-            //res = modReceipe();
+            modifyRecipe(recipes, *recipeCount);
+            printf("\n");
+            res = -1;
             break;
         case 7:
             deleteRecipe(recipes, recipeCount);
@@ -939,28 +1145,28 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct
             res = -1;
             break;
         case 9:
-            scanRecipe(recipes, &recipeCount);
+            scanRecipe(recipes, recipeCount);
             printf("== Returning to Update Menu.. ==\n");
             displayDivider2();
             printf("\n");
             res = -1;
             break;
         case 10:
-            searchRecipe(recipes, recipeCount);
+            searchRecipe(recipes, *recipeCount);
             printf("== Returning to Update Menu.. ==\n");
             displayDivider2();
             printf("\n");
             res = -1;
             break;
         case 11:
-            exportRecipe(recipes, recipeCount);
+            exportRecipe(recipes, *recipeCount);
             printf("== Returning to Update Menu.. ==\n");
             displayDivider2();
             printf("\n");
             res = -1;
             break;
         case 12:
-            importRecipe(recipes, &recipeCount);
+            importRecipe(recipes, recipeCount);
             printf("== Returning to Update Menu.. ==\n");
             displayDivider2();
             printf("\n");
