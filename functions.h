@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <strings.h>
+#include <ctype.h>
 // #include "updatefunctions.h"
 
 typedef char longString[71]; //for steps 70 characters
@@ -19,6 +19,7 @@ struct ingredientTag
     shortString item;
     float       quantity;
     shortString unit;
+    float       calories;
 };
 
 struct recipeTag
@@ -27,7 +28,10 @@ struct recipeTag
     shortString          classification;
     int                  servings;
     struct ingredientTag ingredients[20];
+    int                  ingredientCount;
     longString           steps[15];
+    int                  stepCount;
+    float                totalCalories;
 };
 
 void displayDivider1()
@@ -194,6 +198,29 @@ int checkRecipeTitle (struct recipeTag recipes[], int recipeCount, shortString t
             res = i; // return index of existing recipe
     }
     return res; // not found
+}
+
+void sortRecipeTitle(struct recipeTag recipes[], int recipeCount)
+{
+    int x, y, min;
+    struct recipeTag tempStruct; 
+
+    for(x = 0; x < recipeCount - 1; x++)
+    {
+        min = x;
+        for(y = x + 1; y < recipeCount; y++)
+        {
+            if(strcmp(recipes[y].title, recipes[min].title) < 0)
+                min = y;
+        }
+        if(min != x)
+        {
+            // Swap the entire structs
+            tempStruct = recipes[x];
+            recipes[x] = recipes[min];
+            recipes[min] = tempStruct;
+        }
+    }
 }
 
 int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
@@ -528,10 +555,9 @@ void saveCalories (struct foodTag foods[], int foodCount)
     
     printf("\n >    SAVING FOOD CALORIES...  < \n");
     displayDivider2();
-    printf("--> Enter filename to save: ");
+    printf("--> Enter filename to save (with .txt): ");
     printf("\n--> ");
     getString(filename);
-    strcat(filename, ".txt"); // add .txt extension to filename
 
     sCal = fopen(filename,"w");
 
@@ -557,7 +583,7 @@ void loadCalories(struct foodTag foods[], int *foodCount)
 
     printf("\n>    LOADING FOOD CALORIES...  < \n");
     displayDivider2();
-    printf("--> Enter filename to load(with .txt): ");
+    printf("--> Enter filename to load (with .txt): ");
     printf("\n--> ");
     getString(filename);
 
@@ -624,6 +650,7 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
     int stepCount = 0;
     int doneIngredients = 0;
     int doneSteps = 0;
+    recipes[*recipeCount].totalCalories = 0;
 
     longDivider();
     printf("|>                            ADDING NEW RECIPE...                            <|\n");
@@ -645,7 +672,8 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
     scanf(" %d", &recipes[*recipeCount].servings);
     printf("--> Enter ingredients (type 'done' when finished): \n");
 
-    while (count < 20 && !doneIngredients) {
+    while (count < 20 && !doneIngredients)
+    {
         printf("--> Ingredient %d name: ", count + 1);
         getString(recipes[*recipeCount].ingredients[count].item);
 
@@ -658,9 +686,15 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
             scanf(" %f", &recipes[*recipeCount].ingredients[count].quantity);
             printf("--> Ingredient %d unit: ", count + 1);
             getString(recipes[*recipeCount].ingredients[count].unit);
+            printf("--> Ingredient %d calories per unit: ", count + 1);
+            scanf(" %f", &recipes[*recipeCount].ingredients[count].calories);
+            recipes[*recipeCount].totalCalories += 
+                recipes[*recipeCount].ingredients[count].quantity 
+                * recipes[*recipeCount].ingredients[count].calories;
             count++;
         }
     }
+    recipes[*recipeCount].ingredientCount = count;
 
     printf("--> Enter steps (type 'done' when finished): \n");
 
@@ -674,6 +708,7 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
         else
             stepCount++;
     }
+    recipes[*recipeCount].stepCount = stepCount;
     (*recipeCount)++;
 }
 
@@ -682,7 +717,7 @@ int checkIngredient (shortString ingredient, struct recipeTag recipes[], int nIn
     int res = -1;
     int i;
 
-    for (i = 0; i < 20; i++)
+    for (i = 0; i < recipes[nIndex].ingredientCount; i++)
     {
         if (strcasecmp(recipes[nIndex].ingredients[i].item, ingredient) == 0)
             res = i;
@@ -694,12 +729,7 @@ void deleteIngredient (shortString ingredient, struct recipeTag recipes[], int n
 {
     int i;
     int ingredientIndex = checkIngredient(ingredient, recipes, nIndex);
-    int lastIngredient = 0;
-
-    while (lastIngredient < 20 && recipes[nIndex].ingredients[lastIngredient].item[0] != '\0')
-    {
-        lastIngredient++;
-    }
+    int lastIngredient = recipes[nIndex].ingredientCount; 
 
     if (ingredientIndex != -1)
     {
@@ -712,12 +742,13 @@ void deleteIngredient (shortString ingredient, struct recipeTag recipes[], int n
         recipes[nIndex].ingredients[lastIngredient - 1].item[0] = '\0';
         recipes[nIndex].ingredients[lastIngredient - 1].quantity = 0.0f;
         recipes[nIndex].ingredients[lastIngredient - 1].unit[0] = '\0';
+        recipes[nIndex].ingredientCount--;
     }
 }
 
 void listIngredients (struct recipeTag recipes[], int nIndex)
 {
-    int i, j;
+    int i;
 
     longDivider();
     printf("|>       ----------       LIST OF EXISTING INGREDIENTS       ----------       <|\n");
@@ -725,7 +756,7 @@ void listIngredients (struct recipeTag recipes[], int nIndex)
     printf("|          Ingredient Name            |     Quantity     |        Unit         |\n");
     longDivider();
 
-    for (i = 0; i < 20 && recipes[nIndex].ingredients[i].item[0] != '\0' && strcmp(recipes[nIndex].ingredients[i].item, "done") != 0; i++)
+    for (i = 0; i < recipes[nIndex].ingredientCount; i++)
     {
         printf("| %d. %32s | %16.2f | %19s |\n",
             i + 1, recipes[nIndex].ingredients[i].item, recipes[nIndex].ingredients[i].quantity, recipes[nIndex].ingredients[i].unit);
@@ -735,19 +766,12 @@ void listIngredients (struct recipeTag recipes[], int nIndex)
 void listSteps (struct recipeTag recipes[], int nIndex)
 {
     int i;
-    int lastStep = 0;
-
-    // [lastStep] index of laststep [0] first character of step  
-    while (lastStep < 15 && recipes[nIndex].steps[lastStep][0] != '\0' && strcmp(recipes[nIndex].steps[lastStep], "done") != 0)
-    {
-        lastStep++;
-    }
 
     longDivider();
     printf("|>         ----------         LIST OF EXISTING STEPS         ----------       <|\n");
     longDivider();
 
-    for (i = 0; i < lastStep; i++)
+    for (i = 0; i < recipes[nIndex].stepCount; i++)
     {
         printf("| %d. %73s |\n", i + 1, recipes[nIndex].steps[i]);
     }
@@ -756,12 +780,7 @@ void listSteps (struct recipeTag recipes[], int nIndex)
 void deleteStep (int nStep, struct recipeTag recipes[], int nIndex)
 {
     int i;
-    int lastStep = 0;
-
-    while (lastStep < 15 && recipes[nIndex].steps[lastStep][0] != '\0' && strcmp(recipes[nIndex].steps[lastStep], "done") != 0)
-    {
-        lastStep++;
-    }
+    int lastStep = recipes[nIndex].stepCount;
 
     for (i = nStep - 1; i < lastStep - 1; i++)
     { // shift steps
@@ -770,6 +789,7 @@ void deleteStep (int nStep, struct recipeTag recipes[], int nIndex)
 
     // delete last step info
     recipes[nIndex].steps[lastStep - 1][0] = '\0';
+    recipes[nIndex].stepCount--;
 }
 
 void modifyRecipe (struct recipeTag recipes[], int recipeCount)
@@ -777,6 +797,7 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
     shortString tempTitle, tempIngredient;
     int cOpt = -1;
     int index;
+    int delIdx;
     int ingredientCount, stepCount, nStep; //nstep index of step to be deleted
 
     if (recipeCount == 0)
@@ -830,13 +851,7 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
             switch (cOpt)
             {
             case 1:
-                ingredientCount = 0;
-                while (ingredientCount < 20 && // if max na
-                       recipes[index].ingredients[ingredientCount].item[0] != '\0' && // if walang item
-                       strcmp(recipes[index].ingredients[ingredientCount].item, "done") != 0) // if hindi done
-                {
-                    ingredientCount++;
-                }
+                ingredientCount = recipes[index].ingredientCount;
 
                 if (ingredientCount >= 20)
                 {
@@ -855,9 +870,12 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
                     scanf(" %f", &recipes[index].ingredients[ingredientCount].quantity);
                     printf("--> Enter ingredient unit: ");
                     getString(recipes[index].ingredients[ingredientCount].unit);
-
-                    if (ingredientCount + 1 < 20)
-                        strcpy(recipes[index].ingredients[ingredientCount + 1].item, "done");
+                    printf("--> Enter ingredient calories per unit: ");
+                    scanf(" %f", &recipes[index].ingredients[ingredientCount].calories);
+                    recipes[index].totalCalories += 
+                        recipes[index].ingredients[ingredientCount].quantity * 
+                        recipes[index].ingredients[ingredientCount].calories;
+                    recipes[index].ingredientCount++;
 
                     printf("|>      ----------       INGREDIENT ADDED SUCCESSFULLY!       ----------      <|\n");
                     listIngredients(recipes, index);
@@ -866,13 +884,7 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
                 break;
 
             case 2:
-                ingredientCount = 0;
-                while (ingredientCount < 20 && // if max na
-                       recipes[index].ingredients[ingredientCount].item[0] != '\0' && // if walang item
-                       strcmp(recipes[index].ingredients[ingredientCount].item, "done") != 0) // if hindi done
-                {
-                    ingredientCount++;
-                }
+                ingredientCount = recipes[index].ingredientCount;
 
                 if (ingredientCount == 0)
                 {
@@ -897,6 +909,11 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
                         } while (checkIngredient(tempIngredient, recipes, index) == -1);
                     }
 
+                    delIdx = checkIngredient(tempIngredient, recipes, index);
+                    recipes[index].totalCalories -=
+                        recipes[index].ingredients[delIdx].quantity *
+                        recipes[index].ingredients[delIdx].calories;
+                    
                     deleteIngredient(tempIngredient, recipes, index);
                     printf("|>     ----------       INGREDIENT DELETED SUCCESSFULLY!       ----------     <|\n");
                     listIngredients(recipes, index);
@@ -905,13 +922,7 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
                 break;
 
             case 3:
-                stepCount = 0;
-                while (stepCount < 15 && // if max na
-                      recipes[index].steps[stepCount][0] != '\0' && // if walang step
-                      strcmp(recipes[index].steps[stepCount], "done") != 0) // if hindi done
-                {
-                    stepCount++;
-                }
+                stepCount = recipes[index].stepCount;
 
                 if (stepCount == 15)
                 {
@@ -926,6 +937,7 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
                     longDivider();
                     printf("--> Enter step: ");
                     getString(recipes[index].steps[stepCount]);
+                    recipes[index].stepCount++;
                     printf("|>        ----------        STEP ADDED SUCCESSFULLY!       ----------        <|\n");
                     listSteps(recipes, index);
                     longDivider();
@@ -933,13 +945,7 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
                 break;
 
             case 4:
-                stepCount = 0;
-                while (stepCount < 15 && // if max na
-                      recipes[index].steps[stepCount][0] != '\0' && // if walang step
-                      strcmp(recipes[index].steps[stepCount], "done") != 0) // if hindi done
-                {
-                    stepCount++;
-                }
+                stepCount = recipes[index].stepCount;
 
                 if (stepCount == 0)
                 {
@@ -984,25 +990,8 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
 void listRecipe (struct recipeTag recipes[], int recipeCount)
 {
     int i;
-    int x, y, min;
-    struct recipeTag tempStruct; 
 
-    for(x = 0; x < recipeCount - 1; x++)
-    {
-        min = x;
-        for(y = x + 1; y < recipeCount; y++)
-        {
-            if(strcmp(recipes[y].title, recipes[min].title) < 0)
-                min = y;
-        }
-        if(min != x)
-        {
-            // Swap the entire structs
-            tempStruct = recipes[x];
-            recipes[x] = recipes[min];
-            recipes[min] = tempStruct;
-        }
-    }
+    sortRecipeTitle(recipes, recipeCount); // sort recipes by title before listing
 
     printf("\n");
     if (recipeCount == 0)
@@ -1064,9 +1053,88 @@ void deleteRecipe (struct recipeTag recipes[], int *recipeCount)
 
 }
 
-void scanRecipe (struct recipeTag recipes[], int *recipeCount)
+void scanRecipe (struct recipeTag recipes[], int recipeCount)
 {
-    //scan recipe from file and add to recipe list
+    int i=0;
+    int j;
+    char cOpt;
+    
+    sortRecipeTitle(recipes, recipeCount); // sort recipes by title before scanning
+
+    printf("\n");
+    if (recipeCount == 0)
+    {
+        printf("|>       ----------          NO FOOD RECIPES FOUND!          ----------       <|\n");
+        longDivider();
+    }
+    else
+    {
+        do{
+        longDivider();
+        printf("|>                          SCANNING FOOD RECIPE %2d                           <|\n", i + 1);
+        printf("|             Recipe Title             |   Servings   |     Total Calories     |\n");
+        printf("|==============================================================================|\n");
+        printf("| %37s | %12d | %20.2f |\n",recipes[i].title, recipes[i].servings, recipes[i].totalCalories);
+        printf("|                                  Ingredients                                 |\n");
+        printf("|    Quantity    |   Unit   |          Food Name          |       Calories     |\n");
+        printf("|>        ----------       SCAN FOOD RECIPES SUCCESS!       ----------        <|\n");
+        for(j = 0; j < recipes[i].ingredientCount; j++)
+        {
+            printf("| %13.2f | %8s | %23s | %18.2f |\n",
+                recipes[i].ingredients[j].quantity,
+                recipes[i].ingredients[j].unit,
+                recipes[i].ingredients[j].item,
+                recipes[i].ingredients[j].calories);
+        }
+
+        printf("|                                   Procedure                                  |\n");
+        
+        for(j = 0; j < recipes[i].stepCount; j++)
+        {
+            printf("| %2d: %71s |\n", j + 1, recipes[i].steps[j]);
+        }
+
+        printf("|>        ----------       SCAN FOOD RECIPES SUCCESS!       ----------        <|\n");
+        printf("\n");
+        printf("|>                               CHOOSE OPTION.                               <|\n");
+        printf("|>                  [P] Go to Previous Recipe                                 <|\n");
+        printf("|>                  [N] Go to Next Recipe                                     <|\n");
+        printf("|>                  [X] Return to Update Recipe Box Menu                      <|\n");
+        printf("| Option: ");
+        scanf(" %c", &cOpt);
+        
+        switch(cOpt)
+        {
+            case 'P':
+            case 'p':
+                if(i == 0)
+                {
+                    printf("|>      ----------         THIS IS THE FIRST RECIPE!        ----------        <|\n");
+                    longDivider();
+                }
+                else
+                    i--;
+                break;
+
+            case 'N':
+            case 'n':
+                if(i == recipeCount - 1)
+                {
+                    printf("|>      ----------         THIS IS THE LAST RECIPE!         ----------        <|\n");
+                    longDivider();
+                }
+                else
+                    i++;
+                break;
+
+             default:
+                printf("|>                Invalid option! Please enter a valid option.                <|\n");
+                longDivider();
+                break;
+        }
+        }while(cOpt != 'X' && cOpt != 'x');
+
+    }
 }
 
 void searchRecipe (struct recipeTag recipes[], int recipeCount)
@@ -1076,12 +1144,109 @@ void searchRecipe (struct recipeTag recipes[], int recipeCount)
 
 void exportRecipe (struct recipeTag recipes[], int recipeCount)
 {
+    FILE *eRec;
+    int i, j;
+    shortString filename;
     
+    printf("\n>       EXPORTING RECIPES...   < \n");
+    displayDivider2();
+    printf("--> Enter filename to export (with .txt): ");
+    printf("\n--> ");
+    getString(filename);
+
+    eRec = fopen(filename,"w");
+
+    for(i=0;i<recipeCount;i++)
+    {
+        fprintf(eRec, "%s\n", recipes[i].title);
+        fprintf(eRec, "%d %s\n", recipes[i].servings, recipes[i].classification);
+        fprintf(eRec, "Ingredients %d\n", recipes[i].ingredientCount);
+        for (int j = 0; j < recipes[i].ingredientCount; j++)
+        {
+            fprintf(eRec, "%f %s %s\n", recipes[i].ingredients[j].quantity, 
+                                            recipes[i].ingredients[j].unit, 
+                                            recipes[i].ingredients[j].item);
+        }
+        fprintf(eRec, "Steps %d\n", recipes[i].stepCount);
+        for (int j = 0; j < recipes[i].stepCount; j++)
+        {
+            fprintf(eRec, "%s\n", recipes[i].steps[j]);
+        }
+        fprintf(eRec, "\n");
+    }
+
+    fclose(eRec);
 }
 
 void importRecipe (struct recipeTag recipes[], int *recipeCount)
 {
-   
+   FILE *iRec;
+   shortString filename;
+   int existingIndex;
+   char overwriteChoice;
+
+    printf("\n>       IMPORTING RECIPES...   < \n");
+    displayDivider2();
+    printf("--> Enter filename to import (with .txt): ");
+    printf("\n--> ");
+    getString(filename);
+
+    iRec = fopen(filename,"r");
+
+    if(iRec == NULL)
+    {
+        printf("! File not found. Please check the filename and try again. !\n");
+        displayDivider2();
+    }
+    else
+    {
+        while (*recipeCount < 50 && !feof(iRec))
+        {
+            fscanf(iRec, " %20[^\n]", recipes[*recipeCount].title);
+            fscanf(iRec, "%*c"); 
+
+            // Read servings and classification directly to struct fields
+            fscanf(iRec, " %d %20s", &recipes[*recipeCount].servings, recipes[*recipeCount].classification);
+            fscanf(iRec, "%*c"); 
+
+
+
+            fscanf(lCal, "%*c");  // consume the \n after data
+            fscanf(lCal, "%*c");  // consume blank line \n
+                
+            // Check for duplicates
+            existingIndex = checkFoodName(foods, *foodCount, foods[*foodCount].name);
+                
+            if (existingIndex != -1)  // food name already exists
+            {
+                printf("\n! Food '%s' already exists at entry #%d !\n", foods[*foodCount].name, existingIndex + 1);
+                printf("--> Overwrite existing data? (Y/N): ");
+                    
+                overwriteChoice = '\0';
+                while (overwriteChoice != 'Y' && overwriteChoice != 'y' && overwriteChoice != 'N' && overwriteChoice != 'n')
+                {
+                    scanf(" %c", &overwriteChoice);
+                }
+                
+                if (overwriteChoice == 'Y' || overwriteChoice == 'y')
+                {
+                    foods[existingIndex].quantity = foods[*foodCount].quantity;
+                    strcpy(foods[existingIndex].unit, foods[*foodCount].unit);
+                    foods[existingIndex].calories = foods[*foodCount].calories;
+                    printf("== Entry #%d overwritten successfully! ==\n", existingIndex + 1);
+                }
+                else
+                        printf("== Keeping existing entry #%d. Loaded entry skipped. ==\n", existingIndex + 1);
+            }
+            else  // food name does not exist, add new entry
+            {
+                (*foodCount)++;
+                printf("== Food '%s' loaded successfully! ==\n", foods[*foodCount - 1].name);
+            }
+        }
+    }
+        
+    fclose(lCal);
 }
 
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
@@ -1145,7 +1310,7 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct
             res = -1;
             break;
         case 9:
-            scanRecipe(recipes, recipeCount);
+            scanRecipe(recipes, *recipeCount);
             printf("== Returning to Update Menu.. ==\n");
             displayDivider2();
             printf("\n");
