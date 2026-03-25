@@ -34,21 +34,54 @@ struct recipeTag
 
 void displayDivider1()
 {
-    printf("================================\n");
+    printf("|==============================================================================|\n");
 }
 
 void displayDivider2()
 {
-    printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
+    printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
 }
 
-void longDivider()
+void longDivider() //update/access menu
 {
     printf("|==============================================================================|\n");
 }
 
+void longDivider2() //main menu
+{
+    printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
+}
+
+void returnToMain()
+{
+    printf("\n");
+    longDivider2();
+    printf("==                         RETURNING TO MAIN MENU...                          ==\n");
+    longDivider2();
+    printf("\n");
+}
+
+void returnToUpdate()
+{
+    printf("\n");
+    longDivider2();
+    printf("==                        RETURNING TO UPDATE MENU...                         ==\n");
+    longDivider2();
+    printf("\n");
+}
+
+void returnToAccess()
+{
+    printf("\n");
+    longDivider2();
+    printf("==                        RETURNING TO ACCESS MENU...                         ==\n");
+    longDivider2();
+    printf("\n");
+}
+
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount);
 void listRecipe (struct recipeTag recipes[], int recipeCount);
+int getChoiceAccess (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount);
 
 void getValidIntInput(int *choice)
 {
@@ -61,7 +94,7 @@ void getValidIntInput(int *choice)
             valid = 1;
         else
         {
-            printf(">  Invalid Option! Try again.  <\n");
+            printf("|>                         Invalid Option! Try again.                         <|\n");
             // Clear input buffer
             while ((c = getchar()) != '\n' && c != EOF);
         }
@@ -101,22 +134,37 @@ void getString (shortString str)
 
 void updateMenu ()
 {
-    displayDivider1();
-    printf("| %28s |\n", " ");
-    printf("| %2s UPDATE MENU %13s |\n", " ", " ");
-    printf("| %2s [1] Add Food Calories %4s|\n", " ", " ");
-    printf("| %2s [2] View Food Calories %3s|\n", " ", " ");
-    printf("| %2s [3] Save Calories %8s|\n", " ", " ");
-    printf("| %2s [4] Load Calories %8s|\n", " ", " ");
-    printf("| %2s [5] Add Recipe %11s|\n", " ", " ");
-    printf("| %2s [6] Modify Recipe %8s|\n", " ", " ");
-    printf("| %2s [7] Delete Recipe %8s|\n", " ", " ");
-    printf("| %2s [8] List Recipes %9s|\n", " ", " ");
-    printf("| %2s [9] Scan Recipe %10s|\n", " ", " ");
-    printf("| %2s [10] Search Recipe %7s|\n", " ", " ");
-    printf("| %2s [11] Export Recipe %7s|\n", " ", " ");
-    printf("| %2s [12] Import Recipe %7s|\n", " ", " ");
-    printf("| %2s [13] Exit Update Menu %4s|\n", " ", " ");
+    longDivider();
+    printf("| %76s |\n", " ");
+    printf("| %31s UPDATE MENU %32s |\n", " ", " ");
+    printf("| %2s [1] Add Food Calories %52s|\n", " ", " ");
+    printf("| %2s [2] View Food Calories %51s|\n", " ", " ");
+    printf("| %2s [3] Save Calories %56s|\n", " ", " ");
+    printf("| %2s [4] Load Calories %56s|\n", " ", " ");
+    printf("| %2s [5] Add Recipe %59s|\n", " ", " ");
+    printf("| %2s [6] Modify Recipe %56s|\n", " ", " ");
+    printf("| %2s [7] Delete Recipe %56s|\n", " ", " ");
+    printf("| %2s [8] List Recipes %57s|\n", " ", " ");
+    printf("| %2s [9] Scan Recipe %58s|\n", " ", " ");
+    printf("| %2s [10] Search Recipe %55s|\n", " ", " ");
+    printf("| %2s [11] Export Recipe %55s|\n", " ", " ");
+    printf("| %2s [12] Import Recipe %55s|\n", " ", " ");
+    printf("| %2s [13] Exit Update Menu %52s|\n", " ", " ");
+}
+
+void accessMenu ()
+{
+    longDivider();
+    printf("| %76s |\n", " ");
+    printf("| %32s ACCESS MENU %33s |\n", " ", " ");
+    printf("| %2s [1] Import Recipe %57s|\n", " ", " ");
+    printf("| %2s [2] List Recipes %58s|\n", " ", " ");
+    printf("| %2s [3] Scan Recipe %59s|\n", " ", " ");
+    printf("| %2s [4] Search Recipe %57s|\n", " ", " ");
+    printf("| %2s [5] Generate Shopping List %50s|\n", " ", " ");
+    printf("| %2s [6] Scan Recipes by Ingredient %46s|\n", " ", " ");
+    printf("| %2s [7] Recommend Menu %58s|\n", " ", " ");
+    printf("| %2s [8] Exit Access Menu %53s|\n", " ", " ");
 }
 
 int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount)
@@ -135,25 +183,25 @@ int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes
     
     if (strcmp(user, userKey)==0 && strcmp(pass, passKey)==0)
     {
-        printf(">   USER VALIDATED / SUCCESS   <\n");
-        displayDivider2();
+        printf(">                           USER VALIDATED / SUCCESS                           <\n");
+        longDivider();
         printf("\n");
 
         do
         {
             updateMenu();
-            printf("|%30s|\n", " ");
+            printf("|%78s|\n", " ");
             getValidIntInput(&nChoice);
-            printf("|%30s|\n", " ");
-            displayDivider1();
+            printf("|%78s|\n", " ");
+            longDivider();
             res = getChoiceUpdate(nChoice, foods, foodCount, recipes, recipeCount); 
         } while (res == -1); //ends loop if invalid input or input is exit update menu
     }
         
     else
     {
-        printf("> INVALID USERNAME OR PASSWORD <\n");
-        displayDivider2();
+        printf(">                         INVALID USERNAME OR PASSWORD                         <\n");
+        longDivider();
         printf("\n");
         res = -1;
     }
@@ -161,16 +209,34 @@ int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes
     return res;
 }
 
+int accessMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount)
+{
+    int res;
+    int nChoice;
+
+    do
+    {
+        accessMenu();
+        printf("|%78s|\n", " ");
+        getValidIntInput(&nChoice);
+        printf("|%78s|\n", " ");
+        longDivider();
+        res = getChoiceAccess(nChoice, foods, foodCount, recipes, recipeCount);
+    }while( res == -1); //ends loop if invalid input or input is exit access menu
+
+    return res;
+}
+
 void mainMenu ()
 {
-    displayDivider1();
-    printf("| %28s |\n", " ");
-    printf("| %4s MAIN MENU %13s |\n", " ", " ");
-    printf("| %4s [U] Update Menu %8s|\n", " ", " ");
-    printf("| %4s [A] Access Menu %8s|\n", " ", " ");
-    printf("| %4s [E] Exit Menu %10s|\n", " ", " ");
-    printf("| %28s |\n", " ");
-    displayDivider1();
+    longDivider();
+    printf("| %76s |\n", " ");
+    printf("| %33s MAIN MENU %32s |\n", " ", " ");
+    printf("| %30s [U] Update Menu %30s|\n", " ", " ");
+    printf("| %30s [A] Access Menu %30s|\n", " ", " ");
+    printf("| %30s [E] Exit Menu %32s|\n", " ", " ");
+    printf("| %76s |\n", " ");
+    longDivider();
     printf("\n");
 }
 
@@ -210,16 +276,25 @@ int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct reci
             if(res==0)
             {
                 printf("\n");
-                displayDivider1();
-                printf("|     Exiting Update Menu...   |\n");
-                displayDivider1();
+                longDivider2();
+                printf("|>                           Exiting Update Menu...                           <|\n");
+                longDivider2();
                 printf("\n");
                 res=-1;
             }
 			break;
 		case 'A':
 		case 'a':
-			/*accessMenu function*/;
+			res = accessMode(foods, foodCount, recipes, recipeCount);
+            if(res==0)
+            {
+                printf("\n");
+                longDivider2();
+                printf("|>                           Exiting Access Menu...                           <|\n");
+                longDivider2();
+                printf("\n");
+                res=-1;
+            }
 			break;
 		case 'E':
 		case 'e':
@@ -231,8 +306,10 @@ int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct reci
 		
 		default: 
 		{
-			printf(">  Invalid Option! Try again.  <\n");
-            displayDivider2();
+			printf("\n");
+            longDivider2();
+            printf("|>                         Invalid Option! Try again.                         <|\n");
+            longDivider2();
             printf("\n");
 			res=-1;
 		}
@@ -248,10 +325,10 @@ void displayMain (struct foodTag foods[], int *foodCount, struct recipeTag recip
     do
 	{
 		mainMenu();
-        displayDivider2();
+        longDivider2();
 		printf("-->%1s Enter Mode: ", "");
         scanf(" %c",&cChoice);
-        displayDivider2();
+        longDivider2();
 		
         res = getChoice(cChoice, foods, foodCount, recipes, recipeCount);
 		
@@ -265,15 +342,20 @@ void addFoodCalories (struct foodTag foods[], int *foodCount)
     shortString temp; // temporary string for food name input and checking
     int scanResult;
 
-    printf("\n >    ADDING FOOD CALORIES...  < \n");
-    displayDivider2();
+    printf("\n");
+    longDivider2();
+    printf(">                           ADDING FOOD CALORIES...                            <\n");
+    longDivider2();
 
     do {
         printf("--> Enter food name: ");
         getString(temp);
 
         if (checkFoodName(foods, *foodCount, temp) != -1)
-            printf("! Food exists // View Number %d !\n> -- Enter a different name -- <\n", (checkFoodName(foods, *foodCount, temp)) + 1);
+            {
+                printf("!                         Food exists // View Number %d                        !\n", (checkFoodName(foods, *foodCount, temp)) + 1);
+                printf(">                         -- Enter a different name --                         <\n");
+            }
         else
             strcpy(foods[i].name, temp);
     } while (checkFoodName(foods, *foodCount, temp) != -1);
@@ -286,6 +368,7 @@ void addFoodCalories (struct foodTag foods[], int *foodCount)
         {
             foods[i].quantity = 0; //fix when character is inputted, quantity becomes 0 and loop continues to run but with invalid input
             printf("--> Invalid input. Please enter a number.\n > -- Please try again. -- <\n");
+            
         }
         else if (foods[i].quantity <= 0)
         {
@@ -543,6 +626,11 @@ void saveCalories (struct foodTag foods[], int foodCount)
     }
 
     fclose(sCal);
+
+    longDivider();
+    printf("|>      --------          FOOD CALORIES SAVED SUCCESSFULLY!         --------        <|\n");
+    longDivider();
+    printf("\n");
 }
 
 void loadCalories(struct foodTag foods[], int *foodCount)
@@ -980,6 +1068,7 @@ void listRecipe (struct recipeTag recipes[], int recipeCount)
     printf("\n");
     if (recipeCount == 0)
     {
+        longDivider();
         printf("|>       ----------          NO FOOD RECIPES FOUND!          ----------       <|\n");
         longDivider();
     }
@@ -1152,7 +1241,48 @@ void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foo
 
 void searchRecipe (struct recipeTag recipes[], int recipeCount)
 {
-    
+    shortString tempTitle;
+    int check;
+    int i,j;
+
+    listRecipe(recipes, recipeCount);
+    if (recipeCount != 0)
+    {
+        printf("--> Enter recipe title to search: ");
+        getString(tempTitle);
+        check = checkRecipeTitle(recipes, recipeCount, tempTitle);
+
+        if (check == -1)
+        {
+            longDivider();
+            printf("|>        ----------           RECIPE NOT FOUND!           ----------         <|\n");
+            longDivider();
+        }
+        else
+        {
+            longDivider();
+            printf("|>       ----------       RECIPE FOUND SUCCESSFULLY!       ----------         <|\n");
+            longDivider();
+            printf("| Recipe Title: %-20s Servings: %-5d Classification: %-9s |\n", recipes[check].title, recipes[check].servings, recipes[check].classification);
+            longDivider();
+            printf("| Ingredients: %d %61s |\n", recipes[check].ingredientCount, " ");
+            printf("|          Food Item          |      Quantity       |           Unit           |\n");
+
+            for (i = 0; i < recipes[check].ingredientCount; i++)
+            {
+                printf("| %-27s | %-19.2f | %-24s |\n",
+                    recipes[check].ingredients[i].item, recipes[check].ingredients[i].quantity, recipes[check].ingredients[i].unit);
+            }
+            longDivider();
+            printf("| Steps: %d %67s |\n", recipes[check].stepCount, " ");
+            for (j = 0; j < recipes[check].stepCount; j++)
+            {
+                printf("| Step %d: %68s |\n", j + 1, recipes[check].steps[j]);
+            }
+
+            longDivider();
+        }
+    }
 }
 
 void exportRecipe (struct recipeTag recipes[], int recipeCount)
@@ -1166,37 +1296,48 @@ void exportRecipe (struct recipeTag recipes[], int recipeCount)
     printf("--> Enter filename to export (with .txt): ");
     printf("\n--> ");
     getString(filename);
-
+    
     eRec = fopen(filename,"w");
 
-    for(i=0;i<recipeCount;i++)
+    if(eRec == NULL)
     {
-        fprintf(eRec, "%s\n", recipes[i].title);
-        fprintf(eRec, "%d %s\n", recipes[i].servings, recipes[i].classification);
-        fprintf(eRec, "Ingredients %d\n", recipes[i].ingredientCount);
-        for (int j = 0; j < recipes[i].ingredientCount; j++)
-        {
-            fprintf(eRec, "%f %s %s\n", recipes[i].ingredients[j].quantity, 
-                                            recipes[i].ingredients[j].unit, 
-                                            recipes[i].ingredients[j].item);
-        }
-        fprintf(eRec, "Steps %d\n", recipes[i].stepCount);
-        for (int j = 0; j < recipes[i].stepCount; j++)
-        {
-            fprintf(eRec, "%s\n", recipes[i].steps[j]);
-        }
-        fprintf(eRec, "\n");
+        printf("!        File not found        !\n");
+        displayDivider2();
+        fclose(eRec);
     }
+    else
+    {
+        for(i=0;i<recipeCount;i++)
+        {
+            fprintf(eRec, "%s\n", recipes[i].title);
+            fprintf(eRec, "%d %s\n", recipes[i].servings, recipes[i].classification);
+            fprintf(eRec, "Ingredients %d\n", recipes[i].ingredientCount);
+            for (int j = 0; j < recipes[i].ingredientCount; j++)
+            {
+                fprintf(eRec, "%f %s %s\n", recipes[i].ingredients[j].quantity, 
+                                                recipes[i].ingredients[j].unit, 
+                                                recipes[i].ingredients[j].item);
+            }
+            fprintf(eRec, "Steps %d\n", recipes[i].stepCount);
+            for (int j = 0; j < recipes[i].stepCount; j++)
+            {
+                fprintf(eRec, "%s\n", recipes[i].steps[j]);
+            }
+            fprintf(eRec, "\n");
+        }
 
-    fclose(eRec);
+        fclose(eRec);
+    }
 }
 
 void importRecipe (struct recipeTag recipes[], int *recipeCount)
 {
    FILE *iRec;
    shortString filename;
+   int i;
    int existingIndex;
    char overwriteChoice;
+   char trash[20]; // buffer for reading lines
 
     printf("\n>       IMPORTING RECIPES...   < \n");
     displayDivider2();
@@ -1208,31 +1349,52 @@ void importRecipe (struct recipeTag recipes[], int *recipeCount)
 
     if(iRec == NULL)
     {
-        printf("! File not found. Please check the filename and try again. !\n");
+        printf("!        File not found        !\n");
         displayDivider2();
+        fclose(iRec);
     }
     else
-    {
+    {      
         while (*recipeCount < 50 && !feof(iRec))
         {
             fscanf(iRec, " %20[^\n]", recipes[*recipeCount].title);
-            fscanf(iRec, "%*c"); 
+            fscanf(iRec, "%*c");  // consume the \n after the title
 
             // Read servings and classification directly to struct fields
-            fscanf(iRec, " %d %20s", &recipes[*recipeCount].servings, recipes[*recipeCount].classification);
-            fscanf(iRec, "%*c"); 
+            fscanf(iRec, " %d %20[^\n]", &recipes[*recipeCount].servings, recipes[*recipeCount].classification);
+            fscanf(iRec, "%*c");
+            
+            // Read ingredient count
+            fscanf(iRec, " %20s %d[^\n] ", trash, &recipes[*recipeCount].ingredientCount);
+            fscanf(iRec, "%*c");
 
-
-
-            fscanf(lCal, "%*c");  // consume the \n after data
-            fscanf(lCal, "%*c");  // consume blank line \n
-                
-            // Check for duplicates
-            existingIndex = checkFoodName(foods, *foodCount, foods[*foodCount].name);
-                
-            if (existingIndex != -1)  // food name already exists
+            // Read ingredients
+            for(i=0;i<recipes[*recipeCount].ingredientCount;i++)
             {
-                printf("\n! Food '%s' already exists at entry #%d !\n", foods[*foodCount].name, existingIndex + 1);
+                fscanf(iRec, " %f %20s %20[^\n]", &recipes[*recipeCount].ingredients[i].quantity, 
+                                                 recipes[*recipeCount].ingredients[i].unit, 
+                                                 recipes[*recipeCount].ingredients[i].item);
+                fscanf(iRec, "%*c");
+            }
+
+            //Read step count
+            fscanf(iRec, " %20s %d[^\n]", trash, &recipes[*recipeCount].stepCount);
+            fscanf(iRec, "%*c");
+
+            for(i=0;i<recipes[*recipeCount].stepCount;i++)
+            {
+                fscanf(iRec, " %20[^\n]", recipes[*recipeCount].steps[i]);
+                fscanf(iRec, "%*c");
+            }
+
+            fscanf(iRec, "%*c");  // consume blank line after each recipe
+
+            // Check for duplicates
+            existingIndex = checkRecipeTitle(recipes, *recipeCount, recipes[*recipeCount].title);
+                
+            if (existingIndex != -1)  // recipe title already exists
+            {
+                printf("\n! Recipe '%s' already exists at entry #%d !\n", recipes[*recipeCount].title, existingIndex + 1);
                 printf("--> Overwrite existing data? (Y/N): ");
                     
                 overwriteChoice = '\0';
@@ -1243,23 +1405,32 @@ void importRecipe (struct recipeTag recipes[], int *recipeCount)
                 
                 if (overwriteChoice == 'Y' || overwriteChoice == 'y')
                 {
-                    foods[existingIndex].quantity = foods[*foodCount].quantity;
-                    strcpy(foods[existingIndex].unit, foods[*foodCount].unit);
-                    foods[existingIndex].calories = foods[*foodCount].calories;
+                    
+                    recipes[existingIndex].servings = recipes[*recipeCount].servings;
+                    strcpy(recipes[existingIndex].classification, recipes[*recipeCount].classification);
+                    recipes[existingIndex].ingredientCount = recipes[*recipeCount].ingredientCount;
+                    for (i = 0; i < recipes[*recipeCount].ingredientCount; i++)
+                    {
+                        recipes[existingIndex].ingredients[i] = recipes[*recipeCount].ingredients[i];
+                    }
+                    recipes[existingIndex].stepCount = recipes[*recipeCount].stepCount;
+                    for (i = 0; i < recipes[*recipeCount].stepCount; i++)
+                    {
+                        strcpy(recipes[existingIndex].steps[i], recipes[*recipeCount].steps[i]);
+                    }
                     printf("== Entry #%d overwritten successfully! ==\n", existingIndex + 1);
                 }
                 else
                         printf("== Keeping existing entry #%d. Loaded entry skipped. ==\n", existingIndex + 1);
             }
-            else  // food name does not exist, add new entry
+            else  // recipe title does not exist, add new entry
             {
-                (*foodCount)++;
-                printf("== Food '%s' loaded successfully! ==\n", foods[*foodCount - 1].name);
+                (*recipeCount)++;
+                printf("== Recipe '%s' loaded successfully! ==\n", recipes[*recipeCount - 1].title);
             }
         }
+        fclose(iRec);
     }
-        
-    fclose(lCal);
 }
 
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
@@ -1270,89 +1441,124 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct
     {
         case 1:
             addFoodCalories(foods, foodCount);
-            printf("==  FOOD ADDED SUCCESSFULLY!  ==\n");
-            printf("== Returning to Update Menu.. ==\n");
-            displayDivider2();
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 2:
             viewFoodCalories(foods, *foodCount);
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 3:
-            saveCalories(foods, *foodCount); 
-            printf("==   FILE SAVED SUCCESSFULLY  ==\n");
-            printf("== Returning to Update Menu.. ==\n");
-            displayDivider2();
-            printf("\n");
+            saveCalories(foods, *foodCount);
+            returnToUpdate();
             res = -1;
             break;
         case 4:
             loadCalories(foods, foodCount);
-            printf("== Returning to Update Menu.. ==\n");
-            displayDivider2();
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 5:
             addRecipe(recipes, recipeCount);
-            printf("== Returning to Update Menu.. ==\n");
-            displayDivider2();
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 6:
             modifyRecipe(recipes, *recipeCount);
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 7:
-            deleteRecipe(recipes, recipeCount);
-            printf("== Returning to Update Menu.. ==\n");
-            displayDivider2();
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 8:
             listRecipe(recipes, *recipeCount);
-            printf("== Returning to Update Menu.. ==\n");
-            displayDivider2();
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 9:
             scanRecipe(recipes, *recipeCount, foods, *foodCount);
-            printf("== Returning to Update Menu.. ==\n");
-            displayDivider2();
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 10:
             searchRecipe(recipes, *recipeCount);
-            printf("== Returning to Update Menu.. ==\n");
-            displayDivider2();
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 11:
             exportRecipe(recipes, *recipeCount);
-            printf("== Returning to Update Menu.. ==\n");
-            displayDivider2();
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 12:
             importRecipe(recipes, recipeCount);
-            printf("== Returning to Update Menu.. ==\n");
-            displayDivider2();
-            printf("\n");
+            returnToUpdate();
             res = -1;
             break;
         case 13:
-            //displayMain(foods, foodCount);
+            *foodCount = 0;
+            *recipeCount = 0;
+            returnToMain();
             res = 0;
+            break;
+        
+        default: 
+        {
+            printf("Invalid Option! Please try again\n\n");
+            res=-1;
+        }
+    }
+    
+    return res;
+}
+
+int getChoiceAccess (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
+{
+    int res = 1;
+
+    switch(nChoice)
+    {
+        case 1:
+            importRecipe(recipes, recipeCount);
+            returnToAccess();
+            res = -1;
+            break;
+        case 2:
+            listRecipe(recipes, *recipeCount);
+            returnToAccess();;
+            res = -1;
+            break;
+        case 3:
+            scanRecipe(recipes, *recipeCount, foods, *foodCount);
+            returnToAccess();
+            res = -1;
+            break;
+        case 4:
+            searchRecipe(recipes, *recipeCount);
+            returnToAccess();
+            res = -1;
+            break;
+        case 5:
+            //generateShoppingList(recipes, *recipeCount, foods, *foodCount);
+            returnToAccess();
+            res = -1;
+            break;
+        case 6:
+            //scanIngredient(recipes, *recipeCount, foods, *foodCount);
+            returnToAccess();
+            res = -1;
+            break;
+        case 7:
+            //recommendMenu(recipes, *recipeCount, foods, *foodCount);
+            returnToAccess();
+            res = -1;
+            break;
+        case 8:
+            returnToMain();
+            res = 0; // exit access menu
             break;
         
         default: 
