@@ -23,6 +23,15 @@ UPDATE LOG: by marco
             : Created checkRecipeTitle() function to check if a recipe with a given title exists
             : Updated all functions to include recipe parameters where necessary
             : Created deleteRecipe() function to delete a recipe by title
+
+FINAL REVISIONS FOR EVERYONE:
+1. separate helper functions
+2. add comments to functions
+3. do test cases
+4. change password (bonus)
+5. add clear bg header
+6. test cases
+
 */
 
 #include <stdio.h>

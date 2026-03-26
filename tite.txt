@@ -1,6 +1,0 @@
-sushi
-5.00 1 100.00
-
-sashimi
-2.00 pieces 320.00
-
