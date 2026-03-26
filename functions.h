@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-// #include "updatefunctions.h"
+#include <stdlib.h>
+#include <time.h>
 
+#define MAX_RECIPES 50
 typedef char longString[71]; //for steps 70 characters
 typedef char shortString[21]; //for items 20 characters
 
@@ -1144,6 +1146,51 @@ float getIngredientCalories(const char *ingredientName, struct foodTag foods[], 
     return calories;
 }
 
+float calculateRecipeCalories(struct recipeTag recipe, struct foodTag foods[], int foodCount)
+{
+    float totalCalories = 0.0f;
+    int j;
+    float baseCalories, ingredientCalories;
+
+    for (j = 0; j < 20 && recipe.ingredients[j].item[0] != '\0' && strcmp(recipe.ingredients[j].item, "done") != 0; j++)
+    {
+        baseCalories = getIngredientCalories(recipe.ingredients[j].item, foods, foodCount);
+        ingredientCalories = baseCalories * recipe.ingredients[j].quantity;
+        totalCalories += ingredientCalories;
+    }
+    return totalCalories;
+}
+
+void displayRecipe(struct recipeTag recipe, struct foodTag foods[], int foodCount)
+{
+    int j, k;
+    float baseCalories, ingredientCalories;
+    float totalCalories = 0.0f;
+
+    totalCalories = calculateRecipeCalories(recipe, foods, foodCount);
+
+    longDivider();
+    printf("| Recipe Title: %-20s Servings: %-6d Total Calories: %-8.2f |\n", recipe.title, recipe.servings, totalCalories);
+    printf("| Ingredients: %63s |\n", " ");
+    printf("| Quantity     | Unit            | Food Item                    | Calories     |\n");
+
+    for (j = 0; j < 20 && recipe.ingredients[j].item[0] != '\0' && strcmp(recipe.ingredients[j].item, "done") != 0; j++)
+    {
+        baseCalories = getIngredientCalories(recipe.ingredients[j].item, foods, foodCount);
+        ingredientCalories = baseCalories * recipe.ingredients[j].quantity;
+        printf("| %-12.2f | %-15s | %-28s | %-12.2f |\n",
+            recipe.ingredients[j].quantity, recipe.ingredients[j].unit, recipe.ingredients[j].item, ingredientCalories);
+    }
+
+    printf("| Procedures: %64s |\n", " ");
+    for (k = 0; k < 15 && recipe.steps[k][0] != '\0' && strcmp(recipe.steps[k], "done") != 0; k++)
+    {
+        printf("| Step %d: %68s |\n", k + 1, recipe.steps[k]);
+    }
+
+    longDivider();
+}
+
 void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foods[], int foodCount)
 {
     int i = 0;
@@ -1170,36 +1217,8 @@ void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foo
         printf("  Displaying %d out of %d recipes.\n", i + 1, recipeCount);
         totalCalories = 0;
 
-        // calorie computation for current recipe
-        for (j = 0; j < 20 && recipes[i].ingredients[j].item[0] != '\0' && strcmp(recipes[i].ingredients[j].item, "done") != 0; j++)
-        {
-            baseCalories = getIngredientCalories(recipes[i].ingredients[j].item, foods, foodCount);
-            ingredientCalories = baseCalories * recipes[i].ingredients[j].quantity;
-            totalCalories += ingredientCalories;
-        }
-
-        longDivider();
-        printf("| Recipe Title: %-20s Servings: %-6d Total Calories: %-8.2f |\n", recipes[i].title, recipes[i].servings, totalCalories);
-        printf("| Ingredients: %63s |\n", " ");
-        printf("| Quantity     | Unit            | Food Item                    | Calories     |\n");
-
-        for (j = 0; j < 20 && recipes[i].ingredients[j].item[0] != '\0' && strcmp(recipes[i].ingredients[j].item, "done") != 0; j++)
-        {
-            baseCalories = getIngredientCalories(recipes[i].ingredients[j].item, foods, foodCount);
-            ingredientCalories = baseCalories * recipes[i].ingredients[j].quantity;
-            // print ung ingredients
-            printf("| %-12.2f | %-15s | %-28s | %-12.2f |\n",
-                recipes[i].ingredients[j].quantity, recipes[i].ingredients[j].unit, recipes[i].ingredients[j].item, ingredientCalories);
-        }
-
-        printf("| Procedures: %64s |\n", " ");
-        for (k = 0; k < 15 && recipes[i].steps[k][0] != '\0' && strcmp(recipes[i].steps[k], "done") != 0; k++)
-        {
-            printf("| Step %d: %68s |\n", k + 1, recipes[i].steps[k]);
-        }
-
-        longDivider();
-
+        displayRecipe(recipes[i], foods, foodCount);
+       
         //kung may recipe pa na natira
         if (i < recipeCount - 1)
         {
@@ -1519,6 +1538,160 @@ void scanIngredient (struct recipeTag recipes[], int recipeCount, struct foodTag
 
 }
 
+void displayMainCourse (int mainRecipes[], int starterCount, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
+{
+    int mainIndex;
+    float mainCalories;
+
+    srand(time(NULL));
+    mainIndex = mainRecipes[rand()%starterCount];
+    mainCalories = calculateRecipeCalories(recipes[mainIndex], foods, foodCount);
+
+    printf("|>                        RECOMMENDED MAIN COURSE                            <|\n");
+    printf("\n");
+    displayRecipe(recipes[mainIndex], foods, foodCount);
+    printf("\n");
+}
+
+void displayStarterCourse (int starterRecipes[], int starterCount, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
+{
+    int starterIndex;
+    float starterCalories;
+
+    srand(time(NULL));
+    starterIndex = starterRecipes[rand() % starterCount];
+    starterCalories = calculateRecipeCalories(recipes[starterIndex], foods, foodCount);
+
+    printf("|>                         RECOMMENDED STARTER                             <|\n");
+    printf("\n");
+    displayRecipe(recipes[starterIndex], foods, foodCount);
+    printf("\n");
+}
+
+void displayDessertCourse (int dessertRecipes[], int dessertCount, int dessertIndex, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
+{
+    printf("|>                         RECOMMENDED DESSERT                             <|\n");
+    printf("\n");
+    displayRecipe(recipes[dessertIndex], foods, foodCount);
+    printf("\n");
+}
+
+void recommendMenu (struct recipeTag recipes[], int recipeCount, struct foodTag foods[], int foodCount)
+{
+    float targetCalories, remainingCalories;
+    int i;
+
+    int mainCount = 0, starterCount = 0, dessertCount = 0;
+    int mainRecipes[MAX_RECIPES];
+    int starterRecipes[MAX_RECIPES];
+    int dessertRecipes[MAX_RECIPES];
+
+    int mainIndex, starterIndex, dessertIndex;
+    float mainCalories, starterCalories, dessertCalories;
+
+    longDivider();
+    printf("|>       ----------        RECOMMEND MENU FUNCTION        ----------         <|\n");
+    longDivider();
+
+    if (recipeCount == 0)
+    {
+        printf("|>         ----------       NO RECIPES AVAILABLE!        ----------           <|\n");
+        longDivider();
+        printf("\n");
+    }
+
+    printf("| --> Enter target calorie intake for 1 person: ");
+    scanf("%f", &targetCalories);
+    printf("|%78s|\n", " ");
+    longDivider();
+    printf("\n");
+
+    for (i = 0; i < recipeCount; i++)
+    {
+        if (strcmp(recipes[i].classification, "main") == 0)
+        {
+            mainRecipes[mainCount] = i;
+            mainCount++;
+        }
+        else if (strcmp(recipes[i].classification, "starter") == 0)
+        {
+            starterRecipes[starterCount] = i;
+            starterCount++;
+        }
+        else if (strcmp(recipes[i].classification, "dessert") == 0)
+        {
+            dessertRecipes[dessertCount] = i;
+            dessertCount++;
+        }
+    }
+
+    if (mainCount == 0)
+    {
+        if (starterCount > 0)
+        {
+            starterIndex = starterRecipes[rand() % starterCount];
+            starterCalories = calculateRecipeCalories(recipes[starterIndex], foods, foodCount);
+            if (starterCount > 0 && starterCalories <= targetCalories)
+                displayStarterCourse(starterRecipes, starterCount, recipes, foods, foodCount);
+    
+            remainingCalories = targetCalories - starterCalories;
+
+            srand(time(NULL));
+            dessertIndex = dessertRecipes[rand() % dessertCount];
+            dessertCalories = calculateRecipeCalories(recipes[dessertIndex], foods, foodCount);
+            if (dessertCount > 0 && dessertCalories <= remainingCalories)
+                displayDessertCourse(dessertRecipes, dessertCount, dessertIndex, recipes, foods, foodCount);
+
+        }
+
+        else if (dessertCount > 0)
+        {
+            srand(time(NULL));
+            dessertIndex = dessertRecipes[rand() % dessertCount];
+            dessertCalories = calculateRecipeCalories(recipes[dessertIndex], foods, foodCount);
+            if (dessertCount > 0 && dessertCalories <= remainingCalories)
+                displayDessertCourse(dessertRecipes, dessertCount, dessertIndex, recipes, foods, foodCount);
+        }
+    }
+
+    else
+    {
+        srand(time(NULL));
+        mainIndex = mainRecipes[rand() % mainCount];
+        mainCalories = calculateRecipeCalories(recipes[mainIndex], foods, foodCount);
+        if (mainCount > 0 && mainCalories <= remainingCalories)
+            displayMainCourse(mainRecipes, mainCount, recipes, foods, foodCount);
+
+        remainingCalories = targetCalories - mainCalories;
+
+        if (starterCount > 0)
+        {
+            starterIndex = starterRecipes[rand() % starterCount];
+            starterCalories = calculateRecipeCalories(recipes[starterIndex], foods, foodCount);
+            if (starterCount > 0 && starterCalories <= targetCalories)
+                displayStarterCourse(starterRecipes, starterCount, recipes, foods, foodCount);
+    
+            remainingCalories = targetCalories - starterCalories;
+
+            srand(time(NULL));
+            dessertIndex = dessertRecipes[rand() % dessertCount];
+            dessertCalories = calculateRecipeCalories(recipes[dessertIndex], foods, foodCount);
+            if (dessertCount > 0 && dessertCalories <= remainingCalories)
+                displayDessertCourse(dessertRecipes, dessertCount, dessertIndex, recipes, foods, foodCount);
+
+        }
+
+        else if (dessertCount > 0)
+        {
+            srand(time(NULL));
+            dessertIndex = dessertRecipes[rand() % dessertCount];
+            dessertCalories = calculateRecipeCalories(recipes[dessertIndex], foods, foodCount);
+            if (dessertCount > 0 && dessertCalories <= remainingCalories)
+                displayDessertCourse(dessertRecipes, dessertCount, dessertIndex, recipes, foods, foodCount);
+        }
+    }
+}
+
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
 {
     int res = 1;
@@ -1638,7 +1811,7 @@ int getChoiceAccess (int nChoice, struct foodTag foods[], int *foodCount, struct
             res = -1;
             break;
         case 7:
-            //recommendMenu(recipes, *recipeCount, foods, *foodCount);
+            recommendMenu(recipes, *recipeCount, foods, *foodCount);
             returnToAccess();
             res = -1;
             break;
