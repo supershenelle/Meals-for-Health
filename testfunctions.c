@@ -2,7 +2,7 @@
 #include "functions.h"
 
 // =====================================================================================================
-// TEST FUNCTION FOR SCAN RECIPE
+// TEST FUNCTION FOR RECOMMEND MENU
 
 static void initRecipe(struct recipeTag *recipe,
                        const char *title,
@@ -28,7 +28,7 @@ static void initRecipe(struct recipeTag *recipe,
 
 static void seedFoods(struct foodTag foods[], int *foodCount)
 {
-    *foodCount = 5;
+    *foodCount = 7;
 
     strcpy(foods[0].name, "pasta");
     foods[0].quantity = 1.0f;
@@ -54,11 +54,22 @@ static void seedFoods(struct foodTag foods[], int *foodCount)
     foods[4].quantity = 1.0f;
     strcpy(foods[4].unit, "gram");
     foods[4].calories = 1.3f;
+
+    // Zero-calorie foods for edge-case testing.
+    strcpy(foods[5].name, "water");
+    foods[5].quantity = 1.0f;
+    strcpy(foods[5].unit, "ml");
+    foods[5].calories = 0.0f;
+
+    strcpy(foods[6].name, "cucumber");
+    foods[6].quantity = 1.0f;
+    strcpy(foods[6].unit, "gram");
+    foods[6].calories = 0.0f;
 }
 
 static void seedTestRecipes(struct recipeTag recipes[], int *recipeCount)
 {
-    *recipeCount = 4;
+    *recipeCount = 6;
 
     // Recipe 1: pasta with tomato (matched + matched)
     initRecipe(&recipes[0], "pasta-tomato", "main", 2);
@@ -131,6 +142,28 @@ static void seedTestRecipes(struct recipeTag recipes[], int *recipeCount)
     strcpy(recipes[3].steps[1], "cook pasta");
     strcpy(recipes[3].steps[2], "toss with garlic and oil");
     strcpy(recipes[3].steps[3], "done");
+
+    // Recipe 5: zero-calorie starter.
+    initRecipe(&recipes[4], "hydration-shot", "starter", 1);
+    strcpy(recipes[4].ingredients[0].item, "water");
+    recipes[4].ingredients[0].quantity = 250.0f;
+    strcpy(recipes[4].ingredients[0].unit, "ml");
+    strcpy(recipes[4].ingredients[1].item, "done");
+    strcpy(recipes[4].steps[0], "pour water");
+    strcpy(recipes[4].steps[1], "done");
+
+    // Recipe 6: zero-calorie dessert.
+    initRecipe(&recipes[5], "cool-cucumber", "dessert", 1);
+    strcpy(recipes[5].ingredients[0].item, "cucumber");
+    recipes[5].ingredients[0].quantity = 100.0f;
+    strcpy(recipes[5].ingredients[0].unit, "grams");
+    strcpy(recipes[5].ingredients[1].item, "water");
+    recipes[5].ingredients[1].quantity = 100.0f;
+    strcpy(recipes[5].ingredients[1].unit, "ml");
+    strcpy(recipes[5].ingredients[2].item, "done");
+    strcpy(recipes[5].steps[0], "slice cucumber");
+    strcpy(recipes[5].steps[1], "add water");
+    strcpy(recipes[5].steps[2], "done");
 }
 
 
@@ -145,15 +178,14 @@ int main(void)
     seedFoods(foods, &foodCount);
     seedTestRecipes(recipes, &recipeCount);
 
-    printf("\n=== SCAN RECIPE FUNCTION TEST ===\n");
+    printf("\n=== RECOMMEND MENU FUNCTION TEST ===\n");
     printf("Loaded %d foods and %d recipes.\n\n", foodCount, recipeCount);
     printf("Expected behavior:\n");
-    printf("- Recipes displayed in alphabetical order, one-by-one\n");
-    printf("- Matched ingredients show calculated calories\n");
-    printf("- Unmatched ingredients (banana, honey, garlic, olive-oil) show 0.00 calories\n");
-    printf("- Press 'N' to view next recipe or 'X' to exit\n\n");
+    printf("- Recommend menu should work even with 0-calorie foods (water/cucumber).\n");
+    printf("- With low target calories, zero-calorie recipes can still be recommended.\n");
+    printf("- No crash when recipes include 0-calorie ingredients.\n\n");
 
-    scanRecipe(recipes, recipeCount, foods, foodCount);
+    recommendMenu(recipes, recipeCount, foods, foodCount);
 
     return 0;
 }
