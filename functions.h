@@ -156,14 +156,14 @@ void accessMenu ()
 {
     longDivider();
     printf("| %76s |\n", " ");
-    printf("| %32s ACCESS MENU %33s |\n", " ", " ");
-    printf("| %2s [1] Import Recipe %57s|\n", " ", " ");
-    printf("| %2s [2] List Recipes %58s|\n", " ", " ");
-    printf("| %2s [3] Scan Recipe %59s|\n", " ", " ");
-    printf("| %2s [4] Search Recipe %57s|\n", " ", " ");
-    printf("| %2s [5] Generate Shopping List %50s|\n", " ", " ");
-    printf("| %2s [6] Scan Recipes by Ingredient %46s|\n", " ", " ");
-    printf("| %2s [7] Recommend Menu %58s|\n", " ", " ");
+    printf("| %32s ACCESS MENU %31s |\n", " ", " ");
+    printf("| %2s [1] Import Recipe %56s|\n", " ", " ");
+    printf("| %2s [2] List Recipes %57s|\n", " ", " ");
+    printf("| %2s [3] Scan Recipe %58s|\n", " ", " ");
+    printf("| %2s [4] Search Recipe %56s|\n", " ", " ");
+    printf("| %2s [5] Generate Shopping List %47s|\n", " ", " ");
+    printf("| %2s [6] Scan Recipes by Ingredient %43s|\n", " ", " ");
+    printf("| %2s [7] Recommend Menu %55s|\n", " ", " ");
     printf("| %2s [8] Exit Access Menu %53s|\n", " ", " ");
 }
 
@@ -1433,6 +1433,92 @@ void importRecipe (struct recipeTag recipes[], int *recipeCount)
     }
 }
 
+void generateShoppingList (struct recipeTag recipes[], int recipeCount)
+{
+    shortString tempTitle;
+    int i;
+    int check;
+    int servingSize;
+    float ratio;
+
+    listRecipe(recipes, recipeCount);
+    if(recipeCount != 0)
+    {
+        printf("--> Enter recipe title to generate shopping list: ");
+        getString(tempTitle);
+        check = checkRecipeTitle(recipes, recipeCount, tempTitle);
+        if(check == -1)
+        {
+            longDivider();
+            printf("|>        ----------           RECIPE NOT FOUND!           ----------         <|\n");
+            longDivider();
+        }
+        else
+        {
+            printf("\n");
+            printf("For how many people are you planning to cook this recipe for?:");
+            scanf("%d", &servingSize);
+            ratio = (float)servingSize / recipes[check].servings;
+
+            printf("\n");
+            longDivider();
+            printf("|>        ----------            SHOPPING LIST!             ----------         <|\n");
+            longDivider();
+            printf("| Recipe Title: %-62s |\n", recipes[check].title);
+            printf("| Serving Size: %-62d |\n", servingSize);
+            longDivider();
+            printf("| Ingredients: %d %61s |\n", recipes[check].ingredientCount, " ");
+            printf("|          Food Item          |      Quantity       |           Unit           |\n");
+
+            for (i = 0; i < recipes[check].ingredientCount; i++)
+            {
+                printf("| %-27s | %-19.2f | %-24s |\n",
+                    recipes[check].ingredients[i].item, recipes[check].ingredients[i].quantity * ratio, recipes[check].ingredients[i].unit);
+            }
+            printf("|>         ----------       END OF SHOPPING LIST!        ----------           <|\n");
+            longDivider();
+        }
+    }
+}
+
+void scanIngredient (struct recipeTag recipes[], int recipeCount, struct foodTag foods[], int foodCount)
+{
+    int i, j;
+    shortString tempIngredient;
+    struct recipeTag tempRecipes[50];
+    int tempRecipeCount = 0;
+
+    printf("--> Enter ingredient name to scan: ");
+    getString(tempIngredient);
+
+    for (int i = 0; i < recipeCount; i++)
+    {
+        for (int j = 0; j < recipes[i].ingredientCount; j++)
+        {
+            if (strcasecmp(recipes[i].ingredients[j].item, tempIngredient) == 0)
+            {
+                tempRecipes[tempRecipeCount] = recipes[i];
+                tempRecipeCount++;
+            }
+        }
+    }
+
+    if(tempRecipeCount == 0)
+    {
+        longDivider();
+        printf("|>        ----------          INGREDIENT NOT FOUND!         ----------        <|\n");
+        longDivider();
+    }
+    else
+    {
+        longDivider();
+        printf("|>       ----------       RECIPES WITH '%s' FOUND!       ----------         <|\n", tempIngredient);
+        longDivider();
+        scanRecipe(tempRecipes, tempRecipeCount, foods, foodCount); // pass the foods array and its count
+    }
+
+}
+
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
 {
     int res = 1;
@@ -1542,12 +1628,12 @@ int getChoiceAccess (int nChoice, struct foodTag foods[], int *foodCount, struct
             res = -1;
             break;
         case 5:
-            //generateShoppingList(recipes, *recipeCount, foods, *foodCount);
+            generateShoppingList(recipes, *recipeCount);
             returnToAccess();
             res = -1;
             break;
         case 6:
-            //scanIngredient(recipes, *recipeCount, foods, *foodCount);
+            scanIngredient(recipes, *recipeCount, foods, *foodCount);
             returnToAccess();
             res = -1;
             break;
