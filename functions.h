@@ -1136,7 +1136,7 @@ float getIngredientCalories(const char *ingredientName, struct foodTag foods[], 
 
     for (i = 0; i < foodCount && found == 0; i++)
     {
-        if (foods[i].name[0] != '\0' && strcmp(ingredientName, foods[i].name) == 0)
+        if (foods[i].name[0] != '\0' && strcasecmp(ingredientName, foods[i].name) == 0)
         {
             calories = foods[i].calories;
             found = 1;
@@ -1538,40 +1538,23 @@ void scanIngredient (struct recipeTag recipes[], int recipeCount, struct foodTag
 
 }
 
-void displayMainCourse (int mainRecipes[], int starterCount, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
+void displayMainCourse (int mainRecipes[], int starterCount, int mainIndex, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
 {
-    int mainIndex;
-    float mainCalories;
-
-    srand(time(NULL));
-    mainIndex = mainRecipes[rand()%starterCount];
-    mainCalories = calculateRecipeCalories(recipes[mainIndex], foods, foodCount);
-
-    printf("|>                        RECOMMENDED MAIN COURSE                            <|\n");
-    printf("\n");
+    printf("|>                          RECOMMENDED MAIN COURSE                             <|\n");
     displayRecipe(recipes[mainIndex], foods, foodCount);
     printf("\n");
 }
 
-void displayStarterCourse (int starterRecipes[], int starterCount, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
+void displayStarterCourse (int starterRecipes[], int starterCount, int starterIndex, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
 {
-    int starterIndex;
-    float starterCalories;
-
-    srand(time(NULL));
-    starterIndex = starterRecipes[rand() % starterCount];
-    starterCalories = calculateRecipeCalories(recipes[starterIndex], foods, foodCount);
-
-    printf("|>                         RECOMMENDED STARTER                             <|\n");
-    printf("\n");
+    printf("|>                           RECOMMENDED STARTER                              <|\n");
     displayRecipe(recipes[starterIndex], foods, foodCount);
     printf("\n");
 }
 
 void displayDessertCourse (int dessertRecipes[], int dessertCount, int dessertIndex, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
 {
-    printf("|>                         RECOMMENDED DESSERT                             <|\n");
-    printf("\n");
+    printf("|>                           RECOMMENDED DESSERT                              <|\n");
     displayRecipe(recipes[dessertIndex], foods, foodCount);
     printf("\n");
 }
@@ -1579,18 +1562,19 @@ void displayDessertCourse (int dessertRecipes[], int dessertCount, int dessertIn
 void recommendMenu (struct recipeTag recipes[], int recipeCount, struct foodTag foods[], int foodCount)
 {
     float targetCalories, remainingCalories;
-    int i;
+    int i, tries, picked, foundValid;
+    char cChoice, nextChoice;
 
     int mainCount = 0, starterCount = 0, dessertCount = 0;
     int mainRecipes[MAX_RECIPES];
     int starterRecipes[MAX_RECIPES];
     int dessertRecipes[MAX_RECIPES];
-
-    int mainIndex, starterIndex, dessertIndex;
+    int mainIndex=-1, starterIndex=-1, dessertIndex=-1;
     float mainCalories, starterCalories, dessertCalories;
 
+    printf("\n");
     longDivider();
-    printf("|>       ----------        RECOMMEND MENU FUNCTION        ----------         <|\n");
+    printf("|>        ----------        RECOMMEND MENU FUNCTION        ----------         <|\n");
     longDivider();
 
     if (recipeCount == 0)
@@ -1600,94 +1584,147 @@ void recommendMenu (struct recipeTag recipes[], int recipeCount, struct foodTag 
         printf("\n");
     }
 
-    printf("| --> Enter target calorie intake for 1 person: ");
-    scanf("%f", &targetCalories);
-    printf("|%78s|\n", " ");
-    longDivider();
-    printf("\n");
-
-    for (i = 0; i < recipeCount; i++)
-    {
-        if (strcmp(recipes[i].classification, "main") == 0)
-        {
-            mainRecipes[mainCount] = i;
-            mainCount++;
-        }
-        else if (strcmp(recipes[i].classification, "starter") == 0)
-        {
-            starterRecipes[starterCount] = i;
-            starterCount++;
-        }
-        else if (strcmp(recipes[i].classification, "dessert") == 0)
-        {
-            dessertRecipes[dessertCount] = i;
-            dessertCount++;
-        }
-    }
-
-    if (mainCount == 0)
-    {
-        if (starterCount > 0)
-        {
-            starterIndex = starterRecipes[rand() % starterCount];
-            starterCalories = calculateRecipeCalories(recipes[starterIndex], foods, foodCount);
-            if (starterCount > 0 && starterCalories <= targetCalories)
-                displayStarterCourse(starterRecipes, starterCount, recipes, foods, foodCount);
-    
-            remainingCalories = targetCalories - starterCalories;
-
-            srand(time(NULL));
-            dessertIndex = dessertRecipes[rand() % dessertCount];
-            dessertCalories = calculateRecipeCalories(recipes[dessertIndex], foods, foodCount);
-            if (dessertCount > 0 && dessertCalories <= remainingCalories)
-                displayDessertCourse(dessertRecipes, dessertCount, dessertIndex, recipes, foods, foodCount);
-
-        }
-
-        else if (dessertCount > 0)
-        {
-            srand(time(NULL));
-            dessertIndex = dessertRecipes[rand() % dessertCount];
-            dessertCalories = calculateRecipeCalories(recipes[dessertIndex], foods, foodCount);
-            if (dessertCount > 0 && dessertCalories <= remainingCalories)
-                displayDessertCourse(dessertRecipes, dessertCount, dessertIndex, recipes, foods, foodCount);
-        }
-    }
-
     else
     {
-        srand(time(NULL));
-        mainIndex = mainRecipes[rand() % mainCount];
-        mainCalories = calculateRecipeCalories(recipes[mainIndex], foods, foodCount);
-        if (mainCount > 0 && mainCalories <= remainingCalories)
-            displayMainCourse(mainRecipes, mainCount, recipes, foods, foodCount);
+        printf("| --> Enter target calorie intake for 1 person: ");
+        scanf("%f", &targetCalories);
+        remainingCalories = targetCalories;
+        printf("|%78s|\n", " ");
+        longDivider();
+        printf("\n");
 
-        remainingCalories = targetCalories - mainCalories;
-
-        if (starterCount > 0)
+        for (i = 0; i < recipeCount; i++)
         {
-            starterIndex = starterRecipes[rand() % starterCount];
-            starterCalories = calculateRecipeCalories(recipes[starterIndex], foods, foodCount);
-            if (starterCount > 0 && starterCalories <= targetCalories)
-                displayStarterCourse(starterRecipes, starterCount, recipes, foods, foodCount);
-    
-            remainingCalories = targetCalories - starterCalories;
-
-            srand(time(NULL));
-            dessertIndex = dessertRecipes[rand() % dessertCount];
-            dessertCalories = calculateRecipeCalories(recipes[dessertIndex], foods, foodCount);
-            if (dessertCount > 0 && dessertCalories <= remainingCalories)
-                displayDessertCourse(dessertRecipes, dessertCount, dessertIndex, recipes, foods, foodCount);
-
+            if (strcasecmp(recipes[i].classification, "main") == 0)
+            {
+                mainRecipes[mainCount] = i;
+                mainCount++;
+            }
+            else if (strcasecmp(recipes[i].classification, "starter") == 0)
+            {
+                starterRecipes[starterCount] = i;
+                starterCount++;
+            }
+            else if (strcasecmp(recipes[i].classification, "dessert") == 0)
+            {
+                dessertRecipes[dessertCount] = i;
+                dessertCount++;
+            }
         }
 
-        else if (dessertCount > 0)
+        srand(time(NULL));
+        // random picks
+        if (mainCount > 0)
         {
-            srand(time(NULL));
-            dessertIndex = dessertRecipes[rand() % dessertCount];
-            dessertCalories = calculateRecipeCalories(recipes[dessertIndex], foods, foodCount);
-            if (dessertCount > 0 && dessertCalories <= remainingCalories)
-                displayDessertCourse(dessertRecipes, dessertCount, dessertIndex, recipes, foods, foodCount);
+            foundValid = 0;
+            for (tries = 0; tries < mainCount && foundValid == 0; tries++)
+            {
+                picked = mainRecipes[rand() % mainCount];
+                mainCalories = calculateRecipeCalories(recipes[picked], foods, foodCount);
+
+                if (mainCalories <= remainingCalories)
+                {
+                    mainIndex = picked;
+                    foundValid = 1;
+                }
+            }
+
+            if (mainIndex != -1)
+            {
+                longDivider();
+                printf("| --> A valid main course is available. Show it? [Y/N]: ");
+                scanf(" %c", &nextChoice);
+
+                while (nextChoice != 'Y' && nextChoice != 'y' && nextChoice != 'N' && nextChoice != 'n')
+                {
+                    printf("| --> Invalid choice. Enter Y or N: ");
+                    scanf(" %c", &nextChoice);
+                }
+
+                if (nextChoice == 'Y' || nextChoice == 'y')
+                {
+                    displayMainCourse(mainRecipes, mainCount, mainIndex, recipes, foods, foodCount);
+                    remainingCalories = remainingCalories - mainCalories;
+                }
+            }
+        }
+
+        // only ask/show if a valid starter exists under remaining calories
+        if (starterCount > 0)
+        {
+            foundValid = 0;
+            for (tries = 0; tries < starterCount && foundValid == 0; tries++)
+            {
+                picked = starterRecipes[rand() % starterCount];
+                starterCalories = calculateRecipeCalories(recipes[picked], foods, foodCount);
+
+                if (starterCalories <= remainingCalories)
+                {
+                    starterIndex = picked;
+                    foundValid = 1;
+                }
+            }
+
+            if (starterIndex != -1)
+            {
+                longDivider();
+                printf("| --> A valid starter is available. Show it? [Y/N]: ");
+                scanf(" %c", &nextChoice);
+
+                while (nextChoice != 'Y' && nextChoice != 'y' && nextChoice != 'N' && nextChoice != 'n')
+                {
+                    printf("| --> Invalid choice. Enter Y or N: ");
+                    scanf(" %c", &nextChoice);
+                }
+
+                if (nextChoice == 'Y' || nextChoice == 'y')
+                {
+                    displayStarterCourse(starterRecipes, starterCount, starterIndex, recipes, foods, foodCount);
+                    remainingCalories = remainingCalories - starterCalories;
+                }
+            }
+        }
+
+        if (dessertCount > 0)
+        {
+            foundValid = 0;
+            for (tries = 0; tries < dessertCount && foundValid == 0; tries++)
+            {
+                picked = dessertRecipes[rand() % dessertCount];
+                dessertCalories = calculateRecipeCalories(recipes[picked], foods, foodCount);
+
+                if (dessertCalories <= remainingCalories)
+                {
+                    dessertIndex = picked;
+                    foundValid = 1;
+                }
+            }
+
+            if (dessertIndex != -1)
+            {
+                longDivider();
+                printf("| --> A valid dessert is available. Show it? [Y/N]: ");
+                scanf(" %c", &nextChoice);
+
+                while (nextChoice != 'Y' && nextChoice != 'y' && nextChoice != 'N' && nextChoice != 'n')
+                {
+                    printf("| --> Invalid choice. Enter Y or N: ");
+                    scanf(" %c", &nextChoice);
+                }
+
+                if (nextChoice == 'Y' || nextChoice == 'y')
+                {
+                    displayDessertCourse(dessertRecipes, dessertCount, dessertIndex, recipes, foods, foodCount);
+                    remainingCalories = remainingCalories - dessertCalories;
+                }
+            }
+        }
+
+        if (mainIndex == -1 && starterIndex == -1 && dessertIndex == -1)
+        {
+            longDivider();
+            printf("|>        ----------   NO VALID MENU FOR TARGET CALORIES   ----------        <|\n");
+            longDivider();
         }
     }
 }
