@@ -1186,10 +1186,8 @@ void displayRecipe(struct recipeTag recipe, struct foodTag foods[], int foodCoun
 void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foods[], int foodCount)
 {
     int i = 0;
-    int j, k;
     int exitScan = 0;
     char cChoice;
-    float totalCalories, ingredientCalories, baseCalories;
 
     printf("\n");
     if (recipeCount == 0)
@@ -1207,7 +1205,6 @@ void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foo
     while (i < recipeCount && exitScan == 0)
     {
         printf("  Displaying %d out of %d recipes.\n", i + 1, recipeCount);
-        totalCalories = 0;
 
         displayRecipe(recipes[i], foods, foodCount);
        
@@ -1299,7 +1296,7 @@ void searchRecipe (struct recipeTag recipes[], int recipeCount)
 void exportRecipe (struct recipeTag recipes[], int recipeCount)
 {
     FILE *eRec;
-    int i, j;
+    int i;
     shortString filename;
     
     printf("\n>                             EXPORTING RECIPES...                             <\n");
@@ -1500,9 +1497,9 @@ void scanIngredient (struct recipeTag recipes[], int recipeCount, struct foodTag
     printf("--> Enter ingredient name to scan: ");
     getString(tempIngredient);
 
-    for (int i = 0; i < recipeCount; i++)
+    for (i = 0; i < recipeCount; i++)
     {
-        for (int j = 0; j < recipes[i].ingredientCount; j++)
+        for (j = 0; j < recipes[i].ingredientCount; j++)
         {
             if (strcasecmp(recipes[i].ingredients[j].item, tempIngredient) == 0)
             {
@@ -1559,7 +1556,7 @@ void recommendMenu (struct recipeTag recipes[], int recipeCount, struct foodTag 
 {
     float targetCalories, remainingCalories;
     int i, tries, picked, foundValid;
-    char cChoice, nextChoice;
+    char nextChoice;
 
     int mainCount = 0, starterCount = 0, dessertCount = 0;
     int mainRecipes[MAX_RECIPES];
