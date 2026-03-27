@@ -368,6 +368,7 @@ void addFoodCalories (struct foodTag foods[], int *foodCount)
 
         if (scanResult != 1)
         {
+            scanf(" %*s"); // removes bad input, prevents infinite loop when invalid
             foods[i].quantity = 0; //fix when character is inputted, quantity becomes 0 and loop continues to run but with invalid input
             printf("--> Invalid input. Please enter a number.\n>                              Please try again.                               <\n");            
         }
@@ -380,9 +381,25 @@ void addFoodCalories (struct foodTag foods[], int *foodCount)
 
     printf("--> Enter unit: ");
     getString(foods[i].unit);
-    printf("--> Enter calories: ");
-    scanf(" %f", &foods[i].calories);
+    do {
+        printf("--> Enter calories: ");
+        scanResult = scanf(" %f", &foods[i].calories);
+
+        if (scanResult != 1)
+        {
+            scanf(" %*s"); // removes bad input, prevents infinite loop when invalid
+            foods[i].calories = 0;
+            printf("--> Invalid input. Please enter a number.\n>                              Please try again.                               <\n");
+        }
+        else if (foods[i].calories < 0)
+        {
+            printf("!                      Calories can't be negative                              !\n>                              Please try again.                               <\n");
+        }
+    } while (scanResult != 1 || foods[i].calories < 0);
     (*foodCount)++; // increment food count for next entry
+    longDivider();
+    printf("|>      --------       FOOD CALORIES ADDED SUCCESSFULLY!      --------        <|\n");
+    longDivider();
 }
 
 char nextFoodEntry(int foodCount)
@@ -582,7 +599,8 @@ void viewFoodCalories (struct foodTag foods[], int foodCount)
 
     else if (foodCount == 0)
     {
-        printf("|>     ----------         NO FOOD CALORIE ENTRY!        ----------      <|\n");
+        longDivider(); 
+        printf("|>        ----------         NO FOOD CALORIE ENTRY!        ----------         <|\n");
         longDivider();
     }
 
@@ -784,7 +802,7 @@ void deleteIngredient (shortString ingredient, struct recipeTag recipes[], int n
 
     if (ingredientIndex != -1)
     {
-        for (i = ingredientIndex; i < lastIngredient; i++)
+        for (i = ingredientIndex; i < lastIngredient-1; i++)
         { // shift ingredients  
             recipes[nIndex].ingredients[i] = recipes[nIndex].ingredients[i + 1];
         }
@@ -794,6 +812,12 @@ void deleteIngredient (shortString ingredient, struct recipeTag recipes[], int n
         recipes[nIndex].ingredients[lastIngredient - 1].quantity = 0.0f;
         recipes[nIndex].ingredients[lastIngredient - 1].unit[0] = '\0';
         recipes[nIndex].ingredientCount--;
+    }
+
+    else
+    {
+        printf("|>      ----------         INGREDIENT NOT FOUND!         ----------        <|\n");
+        longDivider();
     }
 }
 
