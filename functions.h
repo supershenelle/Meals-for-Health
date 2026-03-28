@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include <strings.h>
 #include <ctype.h>  
 #include <stdlib.h>
 #include <time.h>
@@ -113,7 +112,7 @@ int caseInsensitiveCompare(const char a[], const char b[])
     return result;
 }
 
-int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount);
+int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount, shortString passKey);
 void listRecipe (struct recipeTag recipes[], int recipeCount);
 int getChoiceAccess (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount);
 
@@ -183,7 +182,8 @@ void updateMenu ()
     printf("| %2s [10] Search Recipe %55s|\n", " ", " ");
     printf("| %2s [11] Export Recipe %55s|\n", " ", " ");
     printf("| %2s [12] Import Recipe %55s|\n", " ", " ");
-    printf("| %2s [13] Exit Update Menu %52s|\n", " ", " ");
+    printf("| %2s [13] Change Password %53s|\n", " ", " ");
+    printf("| %2s [14] Exit Update Menu %52s|\n", " ", " ");
 }
 
 void accessMenu ()
@@ -201,14 +201,60 @@ void accessMenu ()
     printf("| %2s [8] Exit Access Menu %53s|\n", " ", " ");
 }
 
-int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount)
+void changePassword (shortString passKey)
+{
+    FILE* passFile;
+    shortString oldPass;
+    shortString newPass;
+    shortString confirmPass;
+
+    printf("\n");
+    longDivider();
+    printf(">                             CHANGING PASSWORD...                             <\n");
+    longDivider2();
+    printf("-->%1s Enter current password: ", " ");
+    scanf(" %s", oldPass);
+
+    if (strcmp(oldPass, passKey) == 0)
+    {
+        printf("-->%1s Enter new password: ", " ");
+        scanf(" %s", newPass);
+        printf("-->%1s Confirm new password: ", " ");
+        scanf(" %s", confirmPass);
+
+        if (strcmp(newPass, confirmPass) == 0)
+        {
+            strcpy(passKey, newPass);
+            passFile = fopen("NEW_PASSWORD.txt", "w");
+            fprintf(passFile, "%s", passKey);
+            fclose(passFile);
+            printf(">                        Password changed successfully!                        <\n");
+            longDivider();
+            printf("\n");
+        }
+        else
+        {
+            printf(">                       Does not match. Please try again.                      <\n");
+            longDivider();
+            printf("\n");
+        }
+    }
+    else
+    {
+        printf(">                 Incorrect current password. Please try again                 <\n");
+        longDivider();
+        printf("\n");
+    }
+
+}
+
+int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount, shortString passKey)
 {
     int res;
     int nChoice;
     shortString user;
     shortString pass;
     shortString userKey = "admin";
-    shortString passKey = "ad1234";
 
     printf("-->%1s Enter username: ", " ");
     scanf(" %s", user);
@@ -228,7 +274,7 @@ int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes
             getValidIntInput(&nChoice);
             printf("|%78s|\n", " ");
             longDivider();
-            res = getChoiceUpdate(nChoice, foods, foodCount, recipes, recipeCount); 
+            res = getChoiceUpdate(nChoice, foods, foodCount, recipes, recipeCount, passKey); 
         } while (res == -1); //ends loop if invalid input or input is exit update menu
     }
         
@@ -298,7 +344,7 @@ int checkRecipeTitle (struct recipeTag recipes[], int recipeCount, shortString t
     return res; // not found
 }
 
-int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
+int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount, shortString passKey) 
 {
     int res=1;
     
@@ -306,7 +352,7 @@ int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct reci
 	{
 		case 'U':
 		case 'u':
-            res = updateMode(foods, foodCount, recipes, recipeCount);
+            res = updateMode(foods, foodCount, recipes, recipeCount, passKey);
             if(res==0)
             {
                 printf("\n");
@@ -355,7 +401,7 @@ int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct reci
 	return res;
 }
 
-void displayMain (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount)
+void displayMain (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount, shortString passKey)
 {
     char cChoice;
     int res;
@@ -367,7 +413,7 @@ void displayMain (struct foodTag foods[], int *foodCount, struct recipeTag recip
         scanf(" %c",&cChoice);
         longDivider2();
 		
-        res = getChoice(cChoice, foods, foodCount, recipes, recipeCount);
+        res = getChoice(cChoice, foods, foodCount, recipes, recipeCount, passKey);
 		
 	}while(res==-1); //ends loop if invalid input or input is exit
 	
@@ -1788,7 +1834,7 @@ void recommendMenu (struct recipeTag recipes[], int recipeCount, struct foodTag 
     }
 }
 
-int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount) 
+int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount, shortString passKey) 
 {
     int res = 1;
 
@@ -1855,6 +1901,11 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct
             res = -1;
             break;
         case 13:
+            changePassword(passKey);
+            returnToUpdate();
+            res = -1;
+            break;
+        case 14:
             *foodCount = 0;
             *recipeCount = 0;
             returnToMain();

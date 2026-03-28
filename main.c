@@ -21,8 +21,9 @@ int main()
     struct recipeTag recipes[50];
     int foodCount = 0;
     int recipeCount = 0;
+    shortString passKey = "ad1234";
 
-    displayMain(foods, &foodCount, recipes, &recipeCount);
+    displayMain(foods, &foodCount, recipes, &recipeCount, passKey);
 
     return 0;
 }
