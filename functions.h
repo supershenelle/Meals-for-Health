@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
+#include <strings.h>
+#include <ctype.h>  
 #include <stdlib.h>
 #include <time.h>
 
@@ -34,22 +35,12 @@ struct recipeTag
     int                  stepCount;
 };
 
-void displayDivider1()
+void longDivider()
 {
     printf("|==============================================================================|\n");
 }
 
-void displayDivider2()
-{
-    printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
-}
-
-void longDivider() //update/access menu
-{
-    printf("|==============================================================================|\n");
-}
-
-void longDivider2() //main menu
+void longDivider2()
 {
     printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
 }
@@ -79,6 +70,47 @@ void returnToAccess()
     printf("==                        RETURNING TO ACCESS MENU...                         ==\n");
     longDivider2();
     printf("\n");
+}
+
+int caseInsensitiveCompare(const char a[], const char b[])
+{
+    int i = 0;
+    int result = 0;
+    int foundDiff = 0;
+    int ca,cb;
+
+    while (a[i] && b[i])
+    {
+        if (!foundDiff)
+        {
+            ca = tolower(a[i]);
+            cb = tolower(b[i]);
+
+            if (ca != cb)
+            {
+                if (ca < cb)
+                    result = -1;
+                else
+                    result = 1;
+
+                foundDiff = 1; 
+            }
+        }
+
+        i++;
+    }
+
+    if (!foundDiff)
+    {
+        if (a[i] == '\0' && b[i] == '\0')
+            result = 0;
+        else if (a[i] == '\0')
+            result = -1;
+        else
+            result = 1;
+    }
+
+    return result;
 }
 
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount);
@@ -175,8 +207,8 @@ int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes
     int nChoice;
     shortString user;
     shortString pass;
-    shortString userKey = "a";
-    shortString passKey = "a";
+    shortString userKey = "admin";
+    shortString passKey = "ad1234";
 
     printf("-->%1s Enter username: ", " ");
     scanf(" %s", user);
@@ -248,7 +280,7 @@ int checkFoodName (struct foodTag foods[], int foodCount, shortString name)
 
     for (int i = 0; i < foodCount; i++)
     {
-        if (strcasecmp(foods[i].name, name) == 0)
+        if (caseInsensitiveCompare(foods[i].name, name) == 0)
             res = i; // return index of existing food
     }
     return res; // not found
@@ -260,7 +292,7 @@ int checkRecipeTitle (struct recipeTag recipes[], int recipeCount, shortString t
 
     for (int i = 0; i < recipeCount; i++)
     {
-        if (strcasecmp(recipes[i].title, title) == 0)
+        if (caseInsensitiveCompare(recipes[i].title, title) == 0)
             res = i; // return index of existing recipe
     }
     return res; // not found
@@ -300,10 +332,13 @@ int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct reci
 			break;
 		case 'E':
 		case 'e':
-			{
-			/*exitMenu function*/;
+            printf("\n");
+            longDivider2();
+            printf("|>                         Exiting Machine Project...                         <|\n");
+            printf("|>       -----       Made By: Shenelle Nono and Marco Yatco       -----       <|\n");
+            longDivider2();
+            printf("\n");
 			res=0;
-			} 
 			break;
 		
 		default: 
@@ -644,7 +679,7 @@ void saveCalories (struct foodTag foods[], int foodCount)
     fclose(sCal);
 
     longDivider();
-    printf("|>      --------          FOOD CALORIES SAVED SUCCESSFULLY!         --------        <|\n");
+    printf("|>       --------       FOOD CALORIES SAVED SUCCESSFULLY!       --------       <|\n");
     longDivider();
     printf("\n");
 }
@@ -671,9 +706,8 @@ void loadCalories(struct foodTag foods[], int *foodCount)
     }
     else
     {
-        while (*foodCount < 50 && !feof(lCal))
+        while (*foodCount < 50 && fscanf(lCal, " %20[^\n]", foods[*foodCount].name)==1)
         {
-            fscanf(lCal, " %20[^\n]", foods[*foodCount].name);
             fscanf(lCal, "%*c");  // consume the \n after name
     
             // Read qty, unit, calories directly to struct fields
@@ -714,9 +748,8 @@ void loadCalories(struct foodTag foods[], int *foodCount)
                 printf("== Food '%s' loaded successfully! ==\n", foods[*foodCount - 1].name);
             }
         }
+        fclose(lCal);
     }
-        
-    fclose(lCal);
 }
 
 void addRecipe (struct recipeTag recipes[], int *recipeCount)
@@ -734,13 +767,13 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
     getString(recipes[*recipeCount].title);
     printf("--> Enter recipe classification: ");
     getString(recipes[*recipeCount].classification);
-    if (strcasecmp(recipes[*recipeCount].classification, "starter") != 0 && strcasecmp(recipes[*recipeCount].classification, "main") != 0 && strcasecmp(recipes[*recipeCount].classification, "dessert") != 0)
+    if (caseInsensitiveCompare(recipes[*recipeCount].classification, "starter") != 0 && caseInsensitiveCompare(recipes[*recipeCount].classification, "main") != 0 && caseInsensitiveCompare(recipes[*recipeCount].classification, "dessert") != 0)
     {
         do {
             printf("!    Invalid classification. Please enter 'starter', 'main', or 'dessert'.    !\n");
             printf("--> Enter recipe classification: ");
             getString(recipes[*recipeCount].classification);
-        } while (strcasecmp(recipes[*recipeCount].classification, "starter") != 0 && strcasecmp(recipes[*recipeCount].classification, "main") != 0 && strcasecmp(recipes[*recipeCount].classification, "dessert") != 0);
+        } while (caseInsensitiveCompare(recipes[*recipeCount].classification, "starter") != 0 && caseInsensitiveCompare(recipes[*recipeCount].classification, "main") != 0 && caseInsensitiveCompare(recipes[*recipeCount].classification, "dessert") != 0);
     }
     printf("--> Enter number of servings: ");
     scanf(" %d", &recipes[*recipeCount].servings);
@@ -751,7 +784,7 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
         printf("--> Ingredient %d name: ", count + 1);
         getString(recipes[*recipeCount].ingredients[count].item);
 
-        if (strcasecmp(recipes[*recipeCount].ingredients[count].item, "done") == 0)
+        if (caseInsensitiveCompare(recipes[*recipeCount].ingredients[count].item, "done") == 0)
             doneIngredients = 1;
 
         else
@@ -771,7 +804,7 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
         printf("--> Step %d: ", stepCount + 1);
         getString(recipes[*recipeCount].steps[stepCount]);
 
-        if (strcasecmp(recipes[*recipeCount].steps[stepCount], "done") == 0)
+        if (caseInsensitiveCompare(recipes[*recipeCount].steps[stepCount], "done") == 0)
             doneSteps = 1;
 
         else
@@ -788,7 +821,7 @@ int checkIngredient (shortString ingredient, struct recipeTag recipes[], int nIn
 
     for (i = 0; i < recipes[nIndex].ingredientCount; i++)
     {
-        if (strcasecmp(recipes[nIndex].ingredients[i].item, ingredient) == 0)
+        if (caseInsensitiveCompare(recipes[nIndex].ingredients[i].item, ingredient) == 0)
             res = i;
     }
     return res; 
@@ -1066,7 +1099,7 @@ void sortRecipes (struct recipeTag recipes[], int recipeCount)
         min = x;
         for(y = x + 1; y < recipeCount; y++)
         {
-            if(strcasecmp(recipes[y].title, recipes[min].title) < 0)
+            if(caseInsensitiveCompare(recipes[y].title, recipes[min].title) < 0)
                 min = y;
         }
         if(min != x)
@@ -1114,6 +1147,7 @@ void deleteRecipe (struct recipeTag recipes[], int *recipeCount)
     shortString tempTitle;
     int i,index;
 
+    printf("\n");
     longDivider();
     printf("|>                            DELETING A RECIPE...                            <|\n");
     longDivider();
@@ -1152,7 +1186,7 @@ float getIngredientCalories(const char *ingredientName, struct foodTag foods[], 
 
     for (i = 0; i < foodCount && found == 0; i++)
     {
-        if (foods[i].name[0] != '\0' && strcasecmp(ingredientName, foods[i].name) == 0)
+        if (foods[i].name[0] != '\0' && caseInsensitiveCompare(ingredientName, foods[i].name) == 0)
         {
             calories = foods[i].calories;
             found = 1;
@@ -1168,7 +1202,7 @@ float calculateRecipeCalories(struct recipeTag recipe, struct foodTag foods[], i
     int j;
     float baseCalories, ingredientCalories;
 
-    for (j = 0; j < 20 && recipe.ingredients[j].item[0] != '\0' && strcasecmp(recipe.ingredients[j].item, "done") != 0; j++)
+    for (j = 0; j < 20 && recipe.ingredients[j].item[0] != '\0' && caseInsensitiveCompare(recipe.ingredients[j].item, "done") != 0; j++)
     {
         baseCalories = getIngredientCalories(recipe.ingredients[j].item, foods, foodCount);
         ingredientCalories = baseCalories * recipe.ingredients[j].quantity;
@@ -1190,7 +1224,7 @@ void displayRecipe(struct recipeTag recipe, struct foodTag foods[], int foodCoun
     printf("| Ingredients: %63s |\n", " ");
     printf("| Quantity     | Unit            | Food Item                    | Calories     |\n");
 
-    for (j = 0; j < 20 && recipe.ingredients[j].item[0] != '\0' && strcasecmp(recipe.ingredients[j].item, "done") != 0; j++)
+    for (j = 0; j < 20 && recipe.ingredients[j].item[0] != '\0' && caseInsensitiveCompare(recipe.ingredients[j].item, "done") != 0; j++)
     {
         baseCalories = getIngredientCalories(recipe.ingredients[j].item, foods, foodCount);
         ingredientCalories = baseCalories * recipe.ingredients[j].quantity;
@@ -1199,7 +1233,7 @@ void displayRecipe(struct recipeTag recipe, struct foodTag foods[], int foodCoun
     }
 
     printf("| Procedures: %64s |\n", " ");
-    for (k = 0; k < 15 && recipe.steps[k][0] != '\0' && strcasecmp(recipe.steps[k], "done") != 0; k++)
+    for (k = 0; k < 15 && recipe.steps[k][0] != '\0' && caseInsensitiveCompare(recipe.steps[k], "done") != 0; k++)
     {
         printf("| Step %d: %68s |\n", k + 1, recipe.steps[k]);
     }
@@ -1382,8 +1416,7 @@ void importRecipe (struct recipeTag recipes[], int *recipeCount)
     if(iRec == NULL)
     {
         printf("!                                File not found                                !\n");
-        displayDivider2();
-        fclose(iRec);
+        longDivider2();
     }
     else
     {      
@@ -1518,33 +1551,42 @@ void scanIngredient (struct recipeTag recipes[], int recipeCount, struct foodTag
     struct recipeTag tempRecipes[50];
     int tempRecipeCount = 0;
 
-    printf("--> Enter ingredient name to scan: ");
-    getString(tempIngredient);
-
-    for (i = 0; i < recipeCount; i++)
-    {
-        for (j = 0; j < recipes[i].ingredientCount; j++)
-        {
-            if (strcasecmp(recipes[i].ingredients[j].item, tempIngredient) == 0)
-            {
-                tempRecipes[tempRecipeCount] = recipes[i];
-                tempRecipeCount++;
-            }
-        }
-    }
-
-    if(tempRecipeCount == 0)
+    if(recipeCount == 0)
     {
         longDivider();
-        printf("|>        ----------          INGREDIENT NOT FOUND!         ----------        <|\n");
+        printf("|>        ----------           NO RECIPES FOUND!           ----------         <|\n");
         longDivider();
     }
     else
     {
-        longDivider();
-        printf("|>       ----------       RECIPES WITH '%s' FOUND!       ----------         <|\n", tempIngredient);
-        longDivider();
-        scanRecipe(tempRecipes, tempRecipeCount, foods, foodCount); // pass the foods array and its count
+        printf("--> Enter ingredient name to scan: ");
+        getString(tempIngredient);
+
+        for (i = 0; i < recipeCount; i++)
+        {
+            for (j = 0; j < recipes[i].ingredientCount; j++)
+            {
+                if (caseInsensitiveCompare(recipes[i].ingredients[j].item, tempIngredient) == 0)
+                {
+                    tempRecipes[tempRecipeCount] = recipes[i];
+                    tempRecipeCount++;
+                }
+            }
+        }
+
+        if(tempRecipeCount == 0)
+        {
+            longDivider();
+            printf("|>        ----------          INGREDIENT NOT FOUND!         ----------        <|\n");
+            longDivider();
+        }
+        else
+        {
+            longDivider();
+            printf("|>       ----------       RECIPES WITH '%s' FOUND!       ----------         <|\n", tempIngredient);
+            longDivider();
+            scanRecipe(tempRecipes, tempRecipeCount, foods, foodCount); // pass the foods array and its count
+        }
     }
 
 }
@@ -1612,17 +1654,17 @@ void recommendMenu (struct recipeTag recipes[], int recipeCount, struct foodTag 
 
         for (i = 0; i < recipeCount; i++)
         {
-            if (strcasecmp(recipes[i].classification, "main") == 0)
+            if (caseInsensitiveCompare(recipes[i].classification, "main") == 0)
             {
                 mainRecipes[mainCount] = i;
                 mainCount++;
             }
-            else if (strcasecmp(recipes[i].classification, "starter") == 0)
+            else if (caseInsensitiveCompare(recipes[i].classification, "starter") == 0)
             {
                 starterRecipes[starterCount] = i;
                 starterCount++;
             }
-            else if (strcasecmp(recipes[i].classification, "dessert") == 0)
+            else if (caseInsensitiveCompare(recipes[i].classification, "dessert") == 0)
             {
                 dessertRecipes[dessertCount] = i;
                 dessertCount++;
@@ -1783,6 +1825,7 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct
             res = -1;
             break;
         case 7:
+            deleteRecipe(recipes, recipeCount);
             returnToUpdate();
             res = -1;
             break;
@@ -1820,7 +1863,9 @@ int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct
         
         default: 
         {
-            printf("Invalid Option! Please try again\n\n");
+            printf("|>                         Invalid Option! Try again.                         <|\n");
+            longDivider();
+            printf("\n");
             res=-1;
         }
     }
@@ -1871,12 +1916,14 @@ int getChoiceAccess (int nChoice, struct foodTag foods[], int *foodCount, struct
             break;
         case 8:
             returnToMain();
-            res = 0; // exit access menu
+            res = 0; 
             break;
         
         default: 
         {
-            printf("Invalid Option! Please try again\n\n");
+            printf("|>                         Invalid Option! Try again.                         <|\n");
+            longDivider();
+            printf("\n");
             res=-1;
         }
     }
