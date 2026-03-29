@@ -219,6 +219,11 @@ void accessMenu ()
     printf("| %2s [8] Exit Access Menu %53s|\n", " ", " ");
 }
 
+/*
+Verifies the current password then updates it if the new password entries match.
+    @param passKey - the current password to be verified and updated
+    Pre-condition: the user must correctly enter the current password, and both new password entries must match
+*/
 void changePassword (shortString passKey)
 {
     shortString oldPass;
@@ -269,6 +274,7 @@ If the credentials are correct, it displays the update menu and processes the us
     @param recipes - array of recipeTag structs where recipe data is stored
     @param recipeCount - pointer to the integer that keeps track of how many recipe entries are currently stored
     @param passKey - the current password for accessing update mode, used for validating user login
+    @return an integer result code from the last processed menu choice, or -1 if login fails
     Pre-condition: the user must input valid credentials to access the update menu, and must input valid options when navigating the menu
 */
 int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount, shortString passKey)
@@ -312,6 +318,15 @@ int updateMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes
     return res;
 }
 
+/*
+Handles access mode by displaying and processing the access menu until a valid exit condition is met.
+    @param foods - array of foodTag structs where food calorie data is stored
+    @param foodCount - pointer to the integer that keeps track of how many food entries are currently stored
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - pointer to the integer that keeps track of how many recipe entries are currently stored
+    @return an integer result code from the last processed menu choice
+    Pre-condition: the user must input valid menu options
+*/
 int accessMode (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount)
 {
     int res;
@@ -779,6 +794,12 @@ void viewFoodCalories (struct foodTag foods[], int foodCount)
     }
 }
 
+/*
+Saves all food calorie entries to a user-specified file.
+    @param foods - array of foodTag structs where food calorie data is stored
+    @param foodCount - the integer that keeps track of how many food entries are currently stored
+    Pre-condition: foodCount must accurately reflect the number of valid entries, and the user must provide a valid filename
+*/
 void saveCalories (struct foodTag foods[], int foodCount)
 {
     FILE *sCal;
@@ -807,6 +828,12 @@ void saveCalories (struct foodTag foods[], int foodCount)
     printf("\n");
 }
 
+/*
+Loads food calorie data from a user-specified file, prompting the user to overwrite on duplicate entries.
+    @param foods - array of foodTag structs where food calorie data is stored
+    @param foodCount - pointer to the integer that keeps track of how many food entries are currently stored
+    Pre-condition: the file must exist and follow the expected format, and foodCount must not exceed 50 entries
+*/
 void loadCalories(struct foodTag foods[], int *foodCount)
 {
    FILE *lCal;
@@ -1332,6 +1359,12 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
     }
 }
 
+/*
+Sorts the recipes array alphabetically by title using selection sort, case-insensitively.
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - the integer that keeps track of how many recipe entries are currently stored
+    Pre-condition: recipeCount must accurately reflect the number of valid entries in the recipes array
+*/
 void sortRecipes (struct recipeTag recipes[], int recipeCount)
 {
     int x, y, min;
@@ -1354,6 +1387,12 @@ void sortRecipes (struct recipeTag recipes[], int recipeCount)
     }
 }
 
+/*
+Displays all recipes in a formatted table sorted alphabetically, or a not found message if empty.
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - the integer that keeps track of how many recipe entries are currently stored
+    Pre-condition: recipeCount must accurately reflect the number of valid entries in the recipes array
+*/
 void listRecipe (struct recipeTag recipes[], int recipeCount)
 {
     sortRecipes(recipes, recipeCount);
@@ -1385,6 +1424,12 @@ void listRecipe (struct recipeTag recipes[], int recipeCount)
     }
 }
 
+/*
+Deletes a recipe by title, shifting remaining entries down to fill the gap.
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - pointer to the integer that keeps track of how many recipe entries are currently stored
+    Pre-condition: the user must provide a valid recipe title that exists in the recipes array
+*/
 void deleteRecipe (struct recipeTag recipes[], int *recipeCount)
 {
     shortString tempTitle;
@@ -1561,13 +1606,13 @@ void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foo
                 (canPrev && (cChoice == 'P' || cChoice == 'p'))))
         {
             if (canPrev && canNext)
-                printf("|              Invalid choice! Please enter 'P', 'N', or 'X' only               |\n");
+                printf("|              Invalid choice! Please enter 'P', 'N', or 'X' only              |\n");
             else if (canNext)
-                printf("|                 Invalid choice! Please enter 'N' or 'X' only                  |\n");
+                printf("|                 Invalid choice! Please enter 'N' or 'X' only                 |\n");
             else if (canPrev)
-                printf("|                 Invalid choice! Please enter 'P' or 'X' only                  |\n");
+                printf("|                 Invalid choice! Please enter 'P' or 'X' only                 |\n");
             else
-                printf("|                    Invalid choice! Please enter 'X' only                      |\n");
+                printf("|                    Invalid choice! Please enter 'X' only                     |\n");
 
             printf("| %31s Choice: ", " ");
             scanf(" %c", &cChoice);
@@ -1594,6 +1639,12 @@ void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foo
     printf("\n");
 }
 
+/*
+Searches for a recipe by title and displays its full details including ingredients and steps if found.
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - the integer that keeps track of how many recipe entries are currently stored
+    Pre-condition: the user must provide a valid recipe title that exists in the recipes array
+*/
 void searchRecipe (struct recipeTag recipes[], int recipeCount)
 {
     shortString tempTitle;
@@ -1640,6 +1691,12 @@ void searchRecipe (struct recipeTag recipes[], int recipeCount)
     }
 }
 
+/*
+Exports all recipes to a user-specified file, writing each recipe's title, servings, classification, ingredients, and steps.
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - the integer that keeps track of how many recipe entries are currently stored
+    Pre-condition: the user must provide a valid filename, and recipeCount must accurately reflect the number of valid entries
+*/
 void exportRecipe (struct recipeTag recipes[], int recipeCount)
 {
     FILE *eRec;
@@ -1685,6 +1742,12 @@ void exportRecipe (struct recipeTag recipes[], int recipeCount)
     }
 }
 
+/*
+Imports recipes from a user-specified file, prompting the user to overwrite on duplicate entries.
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - pointer to the integer that keeps track of how many recipe entries are currently stored
+    Pre-condition: the file must exist and follow the expected format, and recipeCount must not exceed 50 entries
+*/
 void importRecipe (struct recipeTag recipes[], int *recipeCount)
 {
    FILE *iRec;
@@ -1785,6 +1848,12 @@ void importRecipe (struct recipeTag recipes[], int *recipeCount)
     }
 }
 
+/*
+Generates a shopping list for a recipe scaled to a user-specified serving size.
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - the integer that keeps track of how many recipe entries are currently stored
+    Pre-condition: the user must provide a valid recipe title that exists in the recipes array and a valid serving size
+*/
 void generateShoppingList (struct recipeTag recipes[], int recipeCount)
 {
     shortString tempTitle;
@@ -1833,6 +1902,14 @@ void generateShoppingList (struct recipeTag recipes[], int recipeCount)
     }
 }
 
+/*
+Scans all recipes for a user-specified ingredient and displays all recipes containing it.
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - the integer that keeps track of how many recipe entries are currently stored
+    @param foods - array of foodTag structs where food calorie data is stored
+    @param foodCount - the integer that keeps track of how many food entries are currently stored
+    Pre-condition: the user must provide a valid ingredient name, and both counts must accurately reflect their respective arrays
+*/
 void scanIngredient (struct recipeTag recipes[], int recipeCount, struct foodTag foods[], int foodCount)
 {
     int i, j;
@@ -2116,6 +2193,17 @@ void recommendMenu (struct recipeTag recipes[], int recipeCount, struct foodTag 
     }
 }
 
+/*
+Processes the user's menu choice in update mode and calls the corresponding function.
+    @param nChoice - the integer representing the user's menu selection
+    @param foods - array of foodTag structs where food calorie data is stored
+    @param foodCount - pointer to the integer that keeps track of how many food entries are currently stored
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - pointer to the integer that keeps track of how many recipe entries are currently stored
+    @param passKey - the current password passed to the change password function
+    @return -1 to continue the update menu loop, or 0 to return to the main menu
+    Pre-condition: nChoice must be an integer corresponding to a valid menu option
+*/
 int getChoiceUpdate (int nChoice, struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount, shortString passKey) 
 {
     int res = 1;
