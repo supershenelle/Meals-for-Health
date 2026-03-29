@@ -1,7 +1,5 @@
 // run code using: gcc main.c then call ./a.out in terminal
 
-// FOR TESTING: USERNAME AND PASSWORD FOR LOGIN: 'a'
-
 /*
 FINAL REVISIONS FOR EVERYONE:
 1. separate helper functions
@@ -21,6 +19,7 @@ int main()
     struct recipeTag recipes[50];
     int foodCount = 0;
     int recipeCount = 0;
+
     shortString passKey = "ad1234";
 
     displayMain(foods, &foodCount, recipes, &recipeCount, passKey);

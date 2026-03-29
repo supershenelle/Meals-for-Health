@@ -203,7 +203,6 @@ void accessMenu ()
 
 void changePassword (shortString passKey)
 {
-    FILE* passFile;
     shortString oldPass;
     shortString newPass;
     shortString confirmPass;
@@ -212,22 +211,19 @@ void changePassword (shortString passKey)
     longDivider();
     printf(">                             CHANGING PASSWORD...                             <\n");
     longDivider2();
-    printf("-->%1s Enter current password: ", " ");
+    printf("--> Enter current password: ");
     scanf(" %s", oldPass);
 
     if (strcmp(oldPass, passKey) == 0)
     {
-        printf("-->%1s Enter new password: ", " ");
+        printf("--> Enter new password: ");
         scanf(" %s", newPass);
-        printf("-->%1s Confirm new password: ", " ");
+        printf("--> Confirm new password: ");
         scanf(" %s", confirmPass);
 
         if (strcmp(newPass, confirmPass) == 0)
         {
             strcpy(passKey, newPass);
-            passFile = fopen("NEW_PASSWORD.txt", "w");
-            fprintf(passFile, "%s", passKey);
-            fclose(passFile);
             printf(">                        Password changed successfully!                        <\n");
             longDivider();
             printf("\n");
@@ -404,13 +400,18 @@ int getChoice (char cChoice, struct foodTag foods[], int *foodCount, struct reci
 void displayMain (struct foodTag foods[], int *foodCount, struct recipeTag recipes[], int *recipeCount, shortString passKey)
 {
     char cChoice;
+    shortString modeInput; //para mag invalid if more than 2 characs
     int res;
     do
 	{
 		mainMenu();
         longDivider2();
 		printf("-->%1s Enter Mode: ", "");
-        scanf(" %c",&cChoice);
+        scanf(" %20s", modeInput);
+        if (strlen(modeInput) == 1)
+            cChoice = modeInput[0];
+        else
+            cChoice = '\0';
         longDivider2();
 		
         res = getChoice(cChoice, foods, foodCount, recipes, recipeCount, passKey);
@@ -804,6 +805,7 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
     int stepCount = 0;
     int doneIngredients = 0;
     int doneSteps = 0;
+    int scanResult;
 
     longDivider();
     printf("|>                            ADDING NEW RECIPE...                            <|\n");
@@ -816,15 +818,30 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
     if (caseInsensitiveCompare(recipes[*recipeCount].classification, "starter") != 0 && caseInsensitiveCompare(recipes[*recipeCount].classification, "main") != 0 && caseInsensitiveCompare(recipes[*recipeCount].classification, "dessert") != 0)
     {
         do {
-            printf("!    Invalid classification. Please enter 'starter', 'main', or 'dessert'.    !\n");
+            printf("!     Invalid classification. Please enter 'starter', 'main', or 'dessert'.    !\n");
             printf("--> Enter recipe classification: ");
             getString(recipes[*recipeCount].classification);
         } while (caseInsensitiveCompare(recipes[*recipeCount].classification, "starter") != 0 && caseInsensitiveCompare(recipes[*recipeCount].classification, "main") != 0 && caseInsensitiveCompare(recipes[*recipeCount].classification, "dessert") != 0);
     }
-    printf("--> Enter number of servings: ");
-    scanf(" %d", &recipes[*recipeCount].servings);
-    printf("--> Enter ingredients (type 'done' when finished): \n");
+    
+    do {
+        printf("--> Enter number of servings: ");
+        scanResult = scanf(" %d", &recipes[*recipeCount].servings);
 
+        if (scanResult != 1)
+        {
+            scanf(" %*s"); // removes bad input, prevents infinite loop when invalid
+            recipes[*recipeCount].servings = 0; //fix when character is inputted, quantity becomes 0 and loop continues to run but with invalid input
+            printf("--> Invalid input. Please enter a number.\n>                              Please try again.                               <\n");            
+        }
+        else if (recipes[*recipeCount].servings <= 0)
+        {
+            printf("!                          QTY can't be 0 or negative                          !\n>                              Please try again.                               <\n");
+        }
+
+    } while (scanResult != 1 || recipes[*recipeCount].servings <= 0);
+
+    printf("--> Enter ingredients (type 'done' when finished): \n");
     while (count < 20 && !doneIngredients)
     {
         printf("--> Ingredient %d name: ", count + 1);
@@ -835,8 +852,22 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
 
         else
         {
-            printf("--> Ingredient %d quantity: ", count + 1);
-            scanf(" %f", &recipes[*recipeCount].ingredients[count].quantity);
+            do {
+                printf("--> Ingredient %d quantity: ", count + 1);
+                scanResult = scanf(" %f", &recipes[*recipeCount].ingredients[count].quantity);
+
+                if (scanResult != 1)
+                {
+                    scanf(" %*s"); // removes bad input, prevents infinite loop when invalid
+                    recipes[*recipeCount].ingredients[count].quantity = 0.0f; //fix when character is inputted, quantity becomes 0 and loop continues to run but with invalid input
+                    printf("--> Invalid input. Please enter a number.\n>                              Please try again.                               <\n");            
+                }
+                else if (recipes[*recipeCount].ingredients[count].quantity <= 0)
+                {
+                    printf("!                          QTY can't be 0 or negative                          !\n>                              Please try again.                               <\n");
+                }
+            } while (scanResult != 1 || recipes[*recipeCount].ingredients[count].quantity <= 0);
+
             printf("--> Ingredient %d unit: ", count + 1);
             getString(recipes[*recipeCount].ingredients[count].unit);
             count++;
@@ -952,6 +983,7 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
     int cOpt = -1;
     int index;
     int ingredientCount, stepCount, nStep; //nstep index of step to be deleted
+    int scanResult;
 
     if (recipeCount == 0)
     {
@@ -1104,21 +1136,26 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
                 {
                     listSteps(recipes, index);
                     printf("|                               DELETING A STEP                                |\n");
-                    printf("--> Enter the step number to delete: ");
-                    scanf(" %d", &nStep);
 
-                    if (nStep < 1 || nStep > stepCount)
-                    {
-                        do {
-                            printf("|>        ----------          INVALID STEP NUMBER!         ----------        <|\n");
+                    do {
+                        printf("--> Enter the step number to delete: ");
+                        scanResult = scanf(" %d", &nStep);
+
+                        if (scanResult != 1)
+                        {
+                            scanf(" %*s");
+                            nStep = 0;
+                        }
+
+                        if (scanResult != 1 || nStep < 1 || nStep > stepCount)
+                        {
+                            printf("|>         ----------          INVALID STEP NUMBER!         ----------        <|\n");
                             longDivider();
-                            printf("--> Enter the step number to delete: ");
-                            scanf(" %d", &nStep);
-                        } while (nStep < 1 || nStep > stepCount);
-                    }
+                        }
+                    } while (scanResult != 1 || nStep < 1 || nStep > stepCount);
 
                     deleteStep(nStep, recipes, index);
-                    printf("|>     ----------       STEP DELETED SUCCESSFULLY!       ----------     <|\n");
+                    printf("|>        ----------       STEP DELETED SUCCESSFULLY!       ----------        <|\n");
                     listSteps(recipes, index);
                     longDivider();
                 }
