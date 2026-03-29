@@ -132,7 +132,7 @@ This function gets a valid integer input from the user.
 void getValidIntInput(int *nChoice)
 {
     int valid = 0;
-    int c;
+    shortString discard;
 
     do
     {
@@ -142,8 +142,7 @@ void getValidIntInput(int *nChoice)
         else
         {
             printf("|>                         Invalid Option! Try again.                         <|\n");
-            // Clear input buffer
-            while ((c = getchar()) != '\n' && c != EOF);
+            scanf(" %20s", discard); // removes bad input, prevents infinite loop when invalid
         }
     } while (!valid);
 }
@@ -1332,7 +1331,7 @@ void modifyRecipe (struct recipeTag recipes[], int recipeCount)
 
     }
 }
- 
+
 void sortRecipes (struct recipeTag recipes[], int recipeCount)
 {
     int x, y, min;
@@ -1422,6 +1421,14 @@ void deleteRecipe (struct recipeTag recipes[], int *recipeCount)
 
 }
 
+/*
+This function retrieves the calorie information for a given ingredient by searching through the food entries.
+    @param ingredientName - the name of the ingredient to search for
+    @param foods - array of foodTag structs where food data is stored
+    @param foodCount - the number of food entries currently stored, used to determine how many entries to search through
+    @return - the calorie value of the ingredient if found, otherwise returns 0.0f
+    Pre-condition: the ingredientName must be valid (not empty or null), and the foods array must be properly populated with valid food entries.
+*/
 float getIngredientCalories(const char *ingredientName, struct foodTag foods[], int foodCount)
 {
     int i;
@@ -1440,6 +1447,14 @@ float getIngredientCalories(const char *ingredientName, struct foodTag foods[], 
     return calories;
 }
 
+/*
+This function calculates the total calories for a given recipe by summing up the calories of all its ingredients.
+    @param recipe - the recipe for which to calculate calories
+    @param foods - array of foodTag structs where food data is stored
+    @param foodCount - the number of food entries currently stored, used to determine how many entries to search through
+    @return - the total calorie value of the recipe if found, otherwise returns 0.0f
+    Pre-condition: the recipe must be valid (not empty or null), and the foods array must be properly populated with valid food entries.
+*/
 float calculateRecipeCalories(struct recipeTag recipe, struct foodTag foods[], int foodCount)
 {
     float totalCalories = 0.0f;
@@ -1455,6 +1470,13 @@ float calculateRecipeCalories(struct recipeTag recipe, struct foodTag foods[], i
     return totalCalories;
 }
 
+/*
+This function displays the details of a given recipe, including its ingredients and procedures.
+    @param recipe - the recipe to display
+    @param foods - array of foodTag structs where food data is stored
+    @param foodCount - the number of food entries currently stored, used to determine how many entries to search through
+    Pre-condition: the recipe must be valid (not empty or null), and the foods array must be properly populated with valid food entries.
+*/
 void displayRecipe(struct recipeTag recipe, struct foodTag foods[], int foodCount)
 {
     int j, k;
@@ -1485,6 +1507,14 @@ void displayRecipe(struct recipeTag recipe, struct foodTag foods[], int foodCoun
     longDivider();
 }
 
+/*
+This function allows the user to view the details of each recipe entry one by one, with the option to navigate to the next recipe or exit the scan.
+    @param recipes - array of recipeTag structs where recipe data is stored
+    @param recipeCount - the number of recipe entries currently stored, used to determine how many entries to display and to validate navigation through the recipes
+    @param foods - array of foodTag structs where food data is stored, used to retrieve calorie information for the ingredients in the recipes
+    @param foodCount - the number of food entries currently stored, used to determine how many entries to search through for calorie information
+    Pre-condition: there must be at least 1 recipe entry to view, and the user must input valid navigation choices ('N' for next, 'X' for exit) when prompted.
+*/
 void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foods[], int foodCount)
 {
     int i = 0;
@@ -1497,8 +1527,6 @@ void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foo
         longDivider();
         printf("|>         ----------          RECIPES NOT FOUND!        ----------           <|\n");
         longDivider();
-        printf("\n");
-        return; // pwede na ata to since nadiscuss na recursion
     }
 
     //arrange in alphabetical order
@@ -1835,6 +1863,16 @@ void scanIngredient (struct recipeTag recipes[], int recipeCount, struct foodTag
 
 }
 
+/*
+This function displays the recommended main course recipe based on the user's target calorie intake
+    @param mainRecipes - array of indices for recipes classified as "main" in the recipes array
+    @param starterCount - the number of starter recipes available, used to determine if there are valid starter options to consider for calorie calculations
+    @param mainIndex - the index of the recommended main course recipe in the recipes array, used to retrieve and display the recipe details
+    @param recipes - array of recipeTag structs where recipe data is stored, used to retrieve recipe details for display
+    @param foods - array of foodTag structs where food data is stored, used to retrieve calorie information for calculating total calories of the recommended recipe
+    @param foodCount - the number of food entries currently stored, used to determine how many entries to search through for calorie information
+    Pre-condition: there must be at least 1 main course recipe available that meets the calorie requirements, and the user must input valid choices when prompted to view the recommended recipe.
+*/
 void displayMainCourse (int mainRecipes[], int starterCount, int mainIndex, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
 {
     printf("\n");
@@ -1844,6 +1882,16 @@ void displayMainCourse (int mainRecipes[], int starterCount, int mainIndex, stru
     printf("\n");
 }
 
+/*
+This function displays the recommended starter course recipe based on the user's target calorie intake
+    @param starterRecipes - array of indices for recipes classified as "starter" in the recipes array
+    @param starterCount - the number of starter recipes available, used to determine if there are valid starter options to consider for calorie calculations
+    @param starterIndex - the index of the recommended starter course recipe in the recipes array, used to retrieve and display the recipe details
+    @param recipes - array of recipeTag structs where recipe data is stored, used to retrieve recipe details for display
+    @param foods - array of foodTag structs where food data is stored, used to retrieve calorie information for calculating total calories of the recommended recipe
+    @param foodCount - the number of food entries currently stored, used to determine how many entries to search through for calorie information
+    Pre-condition: there must be at least 1 starter course recipe available that meets the calorie requirements, and the user must input valid choices when prompted to view the recommended recipe.
+*/
 void displayStarterCourse (int starterRecipes[], int starterCount, int starterIndex, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
 {
     printf("\n");
@@ -1853,6 +1901,16 @@ void displayStarterCourse (int starterRecipes[], int starterCount, int starterIn
     printf("\n");
 }
 
+/*
+This function displays the recommended dessert course recipe based on the user's target calorie intake
+    @param dessertRecipes - array of indices for recipes classified as "dessert" in the recipes array
+    @param dessertCount - the number of dessert recipes available, used to determine if there are valid dessert options to consider for calorie calculations
+    @param dessertIndex - the index of the recommended dessert course recipe in the recipes array, used to retrieve and display the recipe details
+    @param recipes - array of recipeTag structs where recipe data is stored, used to retrieve recipe details for display
+    @param foods - array of foodTag structs where food data is stored, used to retrieve calorie information for calculating total calories of the recommended recipe
+    @param foodCount - the number of food entries currently stored, used to determine how many entries to search through for calorie information
+    Pre-condition: there must be at least 1 dessert course recipe available that meets the calorie requirements, and the user must input valid choices when prompted to view the recommended recipe.
+*/
 void displayDessertCourse (int dessertRecipes[], int dessertCount, int dessertIndex, struct recipeTag recipes[], struct foodTag foods[], int foodCount)
 {
     printf("\n");
@@ -1862,6 +1920,15 @@ void displayDessertCourse (int dessertRecipes[], int dessertCount, int dessertIn
     printf("\n");
 }
 
+/*
+This function recommends a menu to the user based on their target calorie intake and the available recipes, allowing them to view the details of the recommended main course, starter, and dessert recipes that meet their calorie requirements.
+    @param recipes - array of recipeTag structs where recipe data is stored, used to retrieve recipe details for display and calorie calculations
+    @param recipeCount - the number of recipe entries currently stored, used to determine how many entries to search through for recommendations
+    @param foods - array of foodTag structs where food data is stored, used to retrieve calorie information for calculating total calories of the recommended recipes
+    @param foodCount - the number of food entries currently stored, used to determine how many entries to search through for calorie information
+    Pre-condition: there must be at least 1 recipe entry available that meets the calorie requirements for each course (main, starter, dessert)
+    in order for recommendations to be made, and the user must input valid choices when prompted to view the recommended recipes.
+*/
 void recommendMenu (struct recipeTag recipes[], int recipeCount, struct foodTag foods[], int foodCount)
 {
     float targetCalories, remainingCalories;
