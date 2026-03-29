@@ -1519,6 +1519,8 @@ void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foo
 {
     int i = 0;
     int exitScan = 0;
+    int canPrev; // para maindetify kung pwede magprev or next, para mahandle yung first and last recipe cases
+    int canNext;
     char cChoice;
 
     printf("\n");
@@ -1534,44 +1536,59 @@ void scanRecipe (struct recipeTag recipes[], int recipeCount, struct foodTag foo
     
     while (i < recipeCount && exitScan == 0)
     {
+        canPrev = (i > 0);
+        canNext = (i < recipeCount - 1);
+
         printf("  Displaying %d out of %d recipes.\n", i + 1, recipeCount);
 
         displayRecipe(recipes[i], foods, foodCount);
-       
-        //kung may recipe pa na natira
-        if (i < recipeCount - 1)
+
+        longDivider();
+        if (canPrev && canNext)
+            printf("|     Type 'P' for previous, 'N' for next recipe, or 'X' to exit Scan Recipe   |");
+        else if (canNext)
+            printf("|           Type 'N' to view next recipe or 'X' to exit Scan Recipe            |");
+        else if (canPrev)
+            printf("|         Type 'P' to view previous recipe or 'X' to exit Scan Recipe          |");
+        else
+            printf("|                      Type 'X' to exit Scan Recipe only                       |");
+
+        printf("\n| %31s Choice: ", " ");
+        scanf(" %c", &cChoice);
+
+        while (!(cChoice == 'X' || cChoice == 'x' ||
+                (canNext && (cChoice == 'N' || cChoice == 'n')) ||
+                (canPrev && (cChoice == 'P' || cChoice == 'p'))))
         {
-            longDivider();
-            printf("|           Type 'N' to view next recipe or 'X' to exit Scan Recipe            |\n");
+            if (canPrev && canNext)
+                printf("|              Invalid choice! Please enter 'P', 'N', or 'X' only               |\n");
+            else if (canNext)
+                printf("|                 Invalid choice! Please enter 'N' or 'X' only                  |\n");
+            else if (canPrev)
+                printf("|                 Invalid choice! Please enter 'P' or 'X' only                  |\n");
+            else
+                printf("|                    Invalid choice! Please enter 'X' only                      |\n");
+
             printf("| %31s Choice: ", " ");
             scanf(" %c", &cChoice);
-
-            while (cChoice != 'N' && cChoice != 'n' && cChoice != 'X' && cChoice != 'x')
-            {
-                printf("|                 Invalid choice!  Please enter 'N' or 'X' only                |\n");
-                printf("| %31s Choice: ", " ");
-                scanf(" %c", &cChoice);
-            }
-
-            if (cChoice == 'X' || cChoice == 'x')
-            {
-                exitScan = 1;
-                longDivider();
-            }
-                
-            else if (cChoice == 'N' || cChoice == 'n')
-            {
-                longDivider();
-                printf("\n");
-                i++;
-            }
         }
 
-        else if (i == recipeCount - 1)
+        if (cChoice == 'X' || cChoice == 'x')
         {
-            printf("|>         ----------      END OF RECIPES REACHED!       ----------           <|\n");
-            longDivider();
             exitScan = 1;
+            longDivider();
+        }
+        else if (canNext && (cChoice == 'N' || cChoice == 'n'))
+        {
+            longDivider();
+            printf("\n");
+            i++;
+        }
+        else if (canPrev && (cChoice == 'P' || cChoice == 'p'))
+        {
+            longDivider();
+            printf("\n");
+            i--;
         }
     }
     printf("\n");
