@@ -806,13 +806,25 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
     int doneIngredients = 0;
     int doneSteps = 0;
     int scanResult;
+    shortString temp;
 
     longDivider();
     printf("|>                            ADDING NEW RECIPE...                            <|\n");
     longDivider();
 
-    printf("--> Enter recipe title: ");
-    getString(recipes[*recipeCount].title);
+    do {
+        printf("--> Enter recipe title: ");
+        getString(temp);
+
+        if (checkRecipeTitle(recipes, *recipeCount, temp) != -1)
+        {
+            printf("!                         Recipe exists // View Number %d                       !\n", (checkRecipeTitle(recipes, *recipeCount, temp)) + 1);
+            printf(">                         -- Enter a different name --                         <\n");
+        }
+        else
+            strcpy(recipes[*recipeCount].title, temp);
+    } while (checkRecipeTitle(recipes, *recipeCount, temp) != -1);
+    
     printf("--> Enter recipe classification: ");
     getString(recipes[*recipeCount].classification);
     if (caseInsensitiveCompare(recipes[*recipeCount].classification, "starter") != 0 && caseInsensitiveCompare(recipes[*recipeCount].classification, "main") != 0 && caseInsensitiveCompare(recipes[*recipeCount].classification, "dessert") != 0)
@@ -848,7 +860,15 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
         getString(recipes[*recipeCount].ingredients[count].item);
 
         if (caseInsensitiveCompare(recipes[*recipeCount].ingredients[count].item, "done") == 0)
-            doneIngredients = 1;
+        {
+            if (count == 0)
+            {
+                printf("|>        ----------   At least 1 ingredient is required!   ----------        <|\n");
+                longDivider();
+            }
+            else
+                doneIngredients = 1;
+        }
 
         else
         {
@@ -882,7 +902,15 @@ void addRecipe (struct recipeTag recipes[], int *recipeCount)
         getString(recipes[*recipeCount].steps[stepCount]);
 
         if (caseInsensitiveCompare(recipes[*recipeCount].steps[stepCount], "done") == 0)
-            doneSteps = 1;
+        {
+            if (stepCount == 0)
+            {
+                printf("|>          ----------   At least 1 step is required!    ----------           <|\n");
+                longDivider();
+            }
+            else
+                doneSteps = 1;
+        }
 
         else
             stepCount++;
